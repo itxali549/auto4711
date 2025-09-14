@@ -74,8 +74,10 @@ const IncomeExpenseTracker: React.FC = () => {
   // Get date string in YYYY-MM-DD format
   const getDateString = (day: number) => {
     const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    return new Date(year, month, day).toISOString().split('T')[0];
+    const month = currentMonth.getMonth() + 1; // Fix: add 1 since getMonth() returns 0-11
+    const dayStr = day.toString().padStart(2, '0');
+    const monthStr = month.toString().padStart(2, '0');
+    return `${year}-${monthStr}-${dayStr}`;
   };
 
   // Check if a date has income or expense entries
@@ -134,6 +136,10 @@ const IncomeExpenseTracker: React.FC = () => {
   const handleDateClick = (day: number) => {
     const dateStr = getDateString(day);
     setSelectedDate(dateStr);
+  };
+
+  // Handle View Day button
+  const handleViewDay = () => {
     setIsModalOpen(true);
   };
 
@@ -200,7 +206,7 @@ const IncomeExpenseTracker: React.FC = () => {
           <p><strong>Contact:</strong> ${entry.contact}</p>
           <p><strong>Car:</strong> ${entry.car}</p>
           <p><strong>Note:</strong> ${entry.note}</p>
-          <p><strong>Amount:</strong> $${entry.amount}</p>
+          <p><strong>Amount:</strong> Rs ${entry.amount}</p>
           <p><strong>Date:</strong> ${selectedDate}</p>
         </div>
       </div>
@@ -340,20 +346,20 @@ const IncomeExpenseTracker: React.FC = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="text-sm text-muted-foreground">Income</div>
-                <div className="text-lg font-bold text-income">${monthlyStats.income}</div>
+                <div className="text-lg font-bold text-income">Rs {monthlyStats.income}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3">
                 <div className="text-sm text-muted-foreground">Expense</div>
-                <div className="text-lg font-bold text-expense">${monthlyStats.expense}</div>
+                <div className="text-lg font-bold text-expense">Rs {monthlyStats.expense}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3">
                 <div className="text-sm text-muted-foreground">Profit</div>
                 <div className={`text-lg font-bold ${monthlyStats.profit >= 0 ? 'text-income' : 'text-expense'}`}>
-                  ${monthlyStats.profit}
+                  Rs {monthlyStats.profit}
                 </div>
               </CardContent>
             </Card>
@@ -417,7 +423,7 @@ const IncomeExpenseTracker: React.FC = () => {
               </h2>
               <div className="flex gap-2">
                 <Button onClick={() => setIsModalOpen(true)}>New Entry</Button>
-                <Button variant="outline" onClick={() => setIsModalOpen(true)}>View Day</Button>
+                <Button variant="outline" onClick={handleViewDay}>View Day</Button>
                 <Button variant="destructive" onClick={handleClearAll}>Clear All</Button>
               </div>
             </div>
@@ -451,7 +457,7 @@ const IncomeExpenseTracker: React.FC = () => {
                             <td className="p-3 text-sm">{entry.contact}</td>
                             <td className="p-3 text-sm">{entry.car}</td>
                             <td className="p-3 text-sm">{entry.note}</td>
-                            <td className="p-3 text-sm font-medium text-income">${entry.amount}</td>
+                            <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>
                             <td className="p-3">
                               <div className="flex gap-2">
                                 <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
@@ -496,7 +502,7 @@ const IncomeExpenseTracker: React.FC = () => {
                         {expenseEntries.map(entry => (
                           <tr key={entry.id} className="border-b border-border">
                             <td className="p-3 text-sm">{entry.note}</td>
-                            <td className="p-3 text-sm font-medium text-expense">${entry.amount}</td>
+                            <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
                             <td className="p-3">
                               <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
                                 Delete
@@ -598,7 +604,7 @@ const IncomeExpenseTracker: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Amount ($)</label>
+              <label className="text-sm font-medium">Amount (Rs)</label>
               <Input
                 type="number"
                 value={formData.amount}
