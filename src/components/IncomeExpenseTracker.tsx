@@ -260,6 +260,11 @@ const IncomeExpenseTracker: React.FC = () => {
   const selectedDateEntries = trackerData[selectedDate] || [];
   const incomeEntries = selectedDateEntries.filter(entry => entry.type === 'income');
   const expenseEntries = selectedDateEntries.filter(entry => entry.type === 'expense');
+  
+  // Calculate daily totals for selected date
+  const dailyIncome = incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const dailyExpense = expenseEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const dailyProfit = dailyIncome - dailyExpense;
 
   return (
     <div className="min-h-screen bg-background">
@@ -431,6 +436,30 @@ const IncomeExpenseTracker: React.FC = () => {
 
           {/* Day Panel */}
           <div className="flex-1 p-6 overflow-y-auto">
+            {/* Daily Summary */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Daily Income</div>
+                  <div className="text-xl font-bold text-income">Rs {dailyIncome}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Daily Expense</div>
+                  <div className="text-xl font-bold text-expense">Rs {dailyExpense}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Daily Profit</div>
+                  <div className={`text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
+                    Rs {dailyProfit}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
             <div className="space-y-6">
               {/* Income Table */}
               <Card>
