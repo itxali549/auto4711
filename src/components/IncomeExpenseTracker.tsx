@@ -4,6 +4,7 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
+import logoImage from '../assets/zb-autocare-logo.jpg';
 
 // Data structure for tracker entries
 interface TrackerEntry {
@@ -47,6 +48,7 @@ const IncomeExpenseTracker: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Customer | null>(null);
   const [showInvoice, setShowInvoice] = useState(false);
+  const [monthlySearchQuery, setMonthlySearchQuery] = useState('');
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -604,16 +606,44 @@ const IncomeExpenseTracker: React.FC = () => {
   const dailyExpense = expenseEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const dailyProfit = dailyIncome - dailyExpense;
 
+  // Filter entries based on monthly search
+  const getFilteredMonthlyEntries = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    let filteredEntries: (TrackerEntry & { date: string })[] = [];
+
+    Object.entries(trackerData).forEach(([dateStr, entries]) => {
+      const entryDate = new Date(dateStr);
+      if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
+        entries.forEach(entry => {
+          if (!monthlySearchQuery || 
+              entry.customer?.toLowerCase().includes(monthlySearchQuery.toLowerCase()) ||
+              entry.note?.toLowerCase().includes(monthlySearchQuery.toLowerCase()) ||
+              entry.car?.toLowerCase().includes(monthlySearchQuery.toLowerCase()) ||
+              entry.contact?.toLowerCase().includes(monthlySearchQuery.toLowerCase())) {
+            filteredEntries.push({ ...entry, date: dateStr });
+          }
+        });
+      }
+    });
+
+    return filteredEntries;
+  };
+
+  const filteredMonthlyEntries = getFilteredMonthlyEntries();
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
         {/* Left Panel */}
-        <div className="bg-card border-r border-border p-6 space-y-6 overflow-y-auto">
+        <div className="bg-card border-r border-border p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
           {/* Brand Logo */}
           <div className="flex items-center justify-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-              ZB
-            </div>
+            <img 
+              src={logoImage} 
+              alt="ZB Autocare Logo" 
+              className="w-24 h-24 object-contain rounded-xl shadow-lg"
+            />
           </div>
 
           {/* Header */}
@@ -721,7 +751,7 @@ const IncomeExpenseTracker: React.FC = () => {
           </Card>
 
           {/* Monthly Summary */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Card>
               <CardContent className="p-3">
                 <div className="text-xs text-muted-foreground">Income</div>
@@ -788,7 +818,7 @@ const IncomeExpenseTracker: React.FC = () => {
         <div className="flex flex-col">
           {/* Top Bar */}
           <div className="bg-card border-b border-border p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold">
                   {new Date(selectedDate).toLocaleDateString('en-US', { 
@@ -799,24 +829,34 @@ const IncomeExpenseTracker: React.FC = () => {
                   })}
                 </h2>
               </div>
-              <div className="flex gap-2">
-                <Button onClick={() => setIsModalOpen(true)}>
-                  New Entry
-                </Button>
-                <Button variant="outline" onClick={handleViewDay}>
-                  View Day
-                </Button>
-                <Button variant="destructive" onClick={handleClearAll}>
-                  Clear All
-                </Button>
+              
+              {/* Monthly Search Bar */}
+              <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                <Input
+                  placeholder="Search monthly entries..."
+                  value={monthlySearchQuery}
+                  onChange={(e) => setMonthlySearchQuery(e.target.value)}
+                  className="w-full sm:w-64"
+                />
+                <div className="flex gap-2">
+                  <Button onClick={() => setIsModalOpen(true)} size="sm">
+                    New Entry
+                  </Button>
+                  <Button variant="outline" onClick={handleViewDay} size="sm">
+                    View Day
+                  </Button>
+                  <Button variant="destructive" onClick={handleClearAll} size="sm">
+                    Clear All
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Day Panel */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
             {/* Daily Summary */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Daily Income</div>
@@ -931,6 +971,39 @@ const IncomeExpenseTracker: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Monthly Search Results */}
+            {monthlySearchQuery && (
+              <Card className="mt-6">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-3">Search Results for "{monthlySearchQuery}"</h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {filteredMonthlyEntries.map((entry, index) => (
+                      <div key={`${entry.date}-${entry.id}`} className="p-3 bg-muted rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium">
+                              {entry.type === 'income' ? `${entry.customer} - ${entry.note}` : entry.note}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {entry.date} • {entry.type === 'income' ? entry.contact : ''}
+                            </div>
+                          </div>
+                          <div className={`font-medium ${entry.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                            Rs {entry.amount}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {filteredMonthlyEntries.length === 0 && (
+                      <div className="text-center text-muted-foreground italic py-4">
+                        No entries found for "{monthlySearchQuery}"
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Tip Note */}
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">
