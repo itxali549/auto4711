@@ -17,6 +17,12 @@ interface TrackerEntry {
   note?: string;
   timestamp: number;
   customerCode?: string;
+  customerSource?: string;
+  newCustomerDiscount?: {
+    eligible: boolean;
+    used: boolean;
+    applied: boolean;
+  };
 }
 
 // Customer data structure
@@ -42,8 +48,10 @@ const IncomeExpenseTracker: React.FC = () => {
     contact: '',
     car: '',
     note: '',
-    amount: ''
+    amount: '',
+    customerSource: ''
   });
+  const [customerDiscountData, setCustomerDiscountData] = useState<Record<string, { eligible: boolean; used: boolean; applied: boolean }>>({});
   const [customerCodes, setCustomerCodes] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Customer | null>(null);
@@ -72,16 +80,35 @@ const IncomeExpenseTracker: React.FC = () => {
     localStorage.setItem('zb-customer-codes', JSON.stringify(customerCodes));
   }, [customerCodes]);
 
-  // Generate unique customer code
-  const generateCustomerCode = (customerName: string, phone: string): string => {
+  // Load and save customer discount data
+  useEffect(() => {
+    const savedDiscountData = localStorage.getItem('zb-customer-discounts');
+    if (savedDiscountData) {
+      setCustomerDiscountData(JSON.parse(savedDiscountData));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('zb-customer-discounts', JSON.stringify(customerDiscountData));
+  }, [customerDiscountData]);
+
+  // Generate unique customer code and check if new customer
+  const generateCustomerCode = (customerName: string, phone: string): { code: string; isNewCustomer: boolean } => {
     const key = `${customerName}-${phone}`.toLowerCase();
     if (customerCodes[key]) {
-      return customerCodes[key];
+      return { code: customerCodes[key], isNewCustomer: false };
     }
     
     const code = `ZB${String(Object.keys(customerCodes).length + 1).padStart(4, '0')}`;
     setCustomerCodes(prev => ({ ...prev, [key]: code }));
-    return code;
+    
+    // Initialize discount data for new customer
+    setCustomerDiscountData(prev => ({
+      ...prev,
+      [key]: { eligible: true, used: false, applied: false }
+    }));
+    
+    return { code, isNewCustomer: true };
   };
 
   // Generate calendar days for current month
@@ -206,8 +233,22 @@ const IncomeExpenseTracker: React.FC = () => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
     let customerCode = '';
+    let customerDiscount = undefined;
+    
     if (entryType === 'income' && formData.customer && formData.contact) {
-      customerCode = generateCustomerCode(formData.customer, formData.contact);
+      const { code, isNewCustomer } = generateCustomerCode(formData.customer, formData.contact);
+      customerCode = code;
+      
+      const customerKey = `${formData.customer}-${formData.contact}`.toLowerCase();
+      const discountData = customerDiscountData[customerKey];
+      
+      if (discountData) {
+        customerDiscount = {
+          eligible: discountData.eligible,
+          used: discountData.used,
+          applied: discountData.applied
+        };
+      }
     }
 
     const newEntry: TrackerEntry = {
@@ -219,7 +260,9 @@ const IncomeExpenseTracker: React.FC = () => {
       car: formData.car,
       note: formData.note,
       timestamp: Date.now(),
-      customerCode
+      customerCode,
+      customerSource: formData.customerSource,
+      newCustomerDiscount: customerDiscount
     };
 
     setTrackerData(prev => ({
@@ -233,7 +276,8 @@ const IncomeExpenseTracker: React.FC = () => {
       contact: '',
       car: '',
       note: '',
-      amount: ''
+      amount: '',
+      customerSource: ''
     });
     setEntryType('income');
   };
@@ -1057,6 +1101,86 @@ const IncomeExpenseTracker: React.FC = () => {
               value={formData.note}
               onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
             />
+
+            {/* Customer Source Radio Buttons for Income */}
+            {entryType === 'income' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  How did customer find us?
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Google Search', 'Facebook Post', 'Referral (by someone)', 'Walk-in'].map((option) => (
+                    <label key={option} className="flex items-center space-x-2 text-sm">
+                      <input
+                        type="radio"
+                        name="customerSource"
+                        value={option}
+                        checked={formData.customerSource === option}
+                        onChange={(e) => setFormData(prev => ({ ...prev, customerSource: e.target.value }))}
+                        className="text-primary"
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Customer Discount Section */}
+            {entryType === 'income' && formData.customer && formData.contact && (() => {
+              const customerKey = `${formData.customer}-${formData.contact}`.toLowerCase();
+              const discountData = customerDiscountData[customerKey];
+              const isNewCustomer = !customerCodes[customerKey];
+              const showDiscount = isNewCustomer || (discountData && discountData.eligible && !discountData.used);
+              
+              if (showDiscount) {
+                return (
+                  <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🎉</span>
+                      <h4 className="text-sm font-medium text-green-800 dark:text-green-200">
+                        New Customer - 10% Discount Available!
+                      </h4>
+                    </div>
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      This customer is eligible for a 10% new customer discount
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          const key = `${formData.customer}-${formData.contact}`.toLowerCase();
+                          setCustomerDiscountData(prev => ({
+                            ...prev,
+                            [key]: { eligible: true, used: true, applied: true }
+                          }));
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Discount Given
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const key = `${formData.customer}-${formData.contact}`.toLowerCase();
+                          setCustomerDiscountData(prev => ({
+                            ...prev,
+                            [key]: { eligible: true, used: false, applied: false }
+                          }));
+                        }}
+                      >
+                        Not Given
+                      </Button>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <Input
               type="number"
               placeholder="Amount"
