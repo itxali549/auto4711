@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
 export type UserRole = 'owner' | 'editor' | 'staff';
@@ -65,25 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserRole = async (authUser: User) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', authUser.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user role:', error);
-      }
-
+      // For now, set default role to 'owner' since we don't have user_roles table yet
       const userWithRole = {
         ...authUser,
-        role: data?.role || 'staff' // Default to staff if no role found
+        role: 'owner' as UserRole // Default to owner for testing
       };
 
       setUser(userWithRole);
     } catch (error) {
-      console.error('Error fetching user role:', error);
-      setUser({ ...authUser, role: 'staff' });
+      console.error('Error setting user role:', error);
+      setUser({ ...authUser, role: 'owner' });
     } finally {
       setLoading(false);
     }

@@ -15,6 +15,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
 
+  console.log('Login component rendered');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
