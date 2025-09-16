@@ -31,22 +31,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session with error handling
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         fetchUserRole(session.user);
       } else {
         setLoading(false);
       }
+    }).catch((error) => {
+      console.error('Error getting session:', error);
+      setLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (session?.user) {
-          await fetchUserRole(session.user);
-        } else {
-          setUser(null);
+        try {
+          if (session?.user) {
+            await fetchUserRole(session.user);
+          } else {
+            setUser(null);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Auth state change error:', error);
           setLoading(false);
         }
       }
