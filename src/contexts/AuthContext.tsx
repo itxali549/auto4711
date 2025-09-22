@@ -31,53 +31,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
+    // Show login immediately, no waiting
+    setLoading(false);
     
-    // Check for existing session first (synchronous from localStorage)
-    const checkExistingSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (!mounted) return;
-        
-        if (session?.user && !error) {
-          // User is already authenticated, fetch role
-          await fetchUserRole(session.user);
-        } else {
-          // No session found, show login
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Error getting session:', error);
-        if (mounted) setLoading(false);
-      }
-    };
-
-    // Listen for auth changes
+    // Listen for auth changes and handle session in background
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        try {
-          if (session?.user) {
-            await fetchUserRole(session.user);
-          } else {
-            setUser(null);
-            setLoading(false);
-          }
-        } catch (error) {
-          console.error('Auth state change error:', error);
-          if (mounted) setLoading(false);
+      (event, session) => {
+        if (session?.user) {
+          // User authenticated, fetch role in background
+          fetchUserRole(session.user);
+        } else {
+          setUser(null);
         }
       }
     );
 
-    // Start session check
-    checkExistingSession();
+    // Check existing session in background without blocking UI
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserRole(session.user);
+      }
+    });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchUserRole = async (authUser: User) => {
