@@ -651,7 +651,9 @@ const IncomeExpenseTracker: React.FC = () => {
   // Calculate daily totals for selected date
   const dailyIncome = incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const dailyExpense = expenseEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const dailyProfit = dailyIncome - dailyExpense;
+  const grossDailyProfit = dailyIncome - dailyExpense;
+  const marketingBudget = Math.max(0, grossDailyProfit * 0.2); // 20% of profit, only if profit is positive
+  const dailyProfit = grossDailyProfit - marketingBudget;
 
   // Filter entries based on monthly search
   const getFilteredMonthlyEntries = () => {
@@ -937,7 +939,7 @@ const IncomeExpenseTracker: React.FC = () => {
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
             {/* Daily Summary */}
             {userRole === 'owner' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-sm text-muted-foreground">Daily Income</div>
@@ -952,10 +954,18 @@ const IncomeExpenseTracker: React.FC = () => {
                 </Card>
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Daily Profit</div>
+                    <div className="text-sm text-muted-foreground">Marketing Budget</div>
+                    <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-muted-foreground">Net Profit</div>
                     <div className={`text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
-                      Rs {dailyProfit}
+                      Rs {dailyProfit.toFixed(0)}
                     </div>
+                    <div className="text-xs text-muted-foreground mt-1">After marketing budget</div>
                   </CardContent>
                 </Card>
               </div>
