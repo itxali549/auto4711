@@ -31,16 +31,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Set loading to false immediately to show login faster
+    setLoading(false);
+    
     // Get initial session with error handling
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         fetchUserRole(session.user);
-      } else {
-        setLoading(false);
       }
     }).catch((error) => {
       console.error('Error getting session:', error);
-      setLoading(false);
     });
 
     // Listen for auth changes with error handling
@@ -51,11 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await fetchUserRole(session.user);
           } else {
             setUser(null);
-            setLoading(false);
           }
         } catch (error) {
           console.error('Auth state change error:', error);
-          setLoading(false);
         }
       }
     );
