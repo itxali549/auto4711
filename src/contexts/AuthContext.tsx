@@ -31,34 +31,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set loading to false immediately to show login faster
-    setLoading(false);
+    let mounted = true;
     
-    // Get initial session with error handling
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserRole(session.user);
+    // Check for existing session first (synchronous from localStorage)
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        if (session?.user && !error) {
+          // User is already authenticated, fetch role
+          await fetchUserRole(session.user);
+        } else {
+          // No session found, show login
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+        if (mounted) setLoading(false);
       }
-    }).catch((error) => {
-      console.error('Error getting session:', error);
-    });
+    };
 
-    // Listen for auth changes with error handling
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         try {
           if (session?.user) {
             await fetchUserRole(session.user);
           } else {
             setUser(null);
+            setLoading(false);
           }
         } catch (error) {
           console.error('Auth state change error:', error);
+          if (mounted) setLoading(false);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Start session check
+    checkExistingSession();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserRole = async (authUser: User) => {
