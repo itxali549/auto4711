@@ -162,26 +162,43 @@ const IncomeExpenseTracker: React.FC = () => {
     const month = currentMonth.getMonth();
     let totalIncome = 0;
     let totalExpense = 0;
+    let totalMarketingBudget = 0;
     let savedDates = 0;
 
     Object.entries(trackerData).forEach(([dateStr, entries]) => {
       const entryDate = new Date(dateStr);
       if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
         if (entries.length > 0) savedDates++;
+        
+        let dailyIncome = 0;
+        let dailyExpense = 0;
+        
         entries.forEach(entry => {
           if (entry.type === 'income') {
             totalIncome += entry.amount;
+            dailyIncome += entry.amount;
           } else {
             totalExpense += entry.amount;
+            dailyExpense += entry.amount;
           }
         });
+        
+        // Calculate daily marketing budget (20% of daily profit if positive)
+        const dailyGrossProfit = dailyIncome - dailyExpense;
+        const dailyMarketingBudget = Math.max(0, dailyGrossProfit * 0.2);
+        totalMarketingBudget += dailyMarketingBudget;
       }
     });
+
+    const grossProfit = totalIncome - totalExpense;
+    const netProfit = grossProfit - totalMarketingBudget;
 
     return {
       income: totalIncome,
       expense: totalExpense,
-      profit: totalIncome - totalExpense,
+      grossProfit,
+      marketingBudget: totalMarketingBudget,
+      profit: netProfit,
       savedDates
     };
   };
@@ -839,13 +856,19 @@ const IncomeExpenseTracker: React.FC = () => {
               </Card>
               <Card>
                 <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Profit</div>
-                  <div className={`font-bold ${monthlyStats.profit >= 0 ? 'text-income' : 'text-expense'}`}>
-                    Rs {monthlyStats.profit}
-                  </div>
+                  <div className="text-xs text-muted-foreground">Marketing</div>
+                  <div className="font-bold text-orange-600">Rs {monthlyStats.marketingBudget.toFixed(0)}</div>
                 </CardContent>
               </Card>
               <Card>
+                <CardContent className="p-3">
+                  <div className="text-xs text-muted-foreground">Net Profit</div>
+                  <div className={`font-bold ${monthlyStats.profit >= 0 ? 'text-income' : 'text-expense'}`}>
+                    Rs {monthlyStats.profit.toFixed(0)}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="col-span-2">
                 <CardContent className="p-3">
                   <div className="text-xs text-muted-foreground">Saved Dates</div>
                   <div className="font-bold">{monthlyStats.savedDates}</div>
