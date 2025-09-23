@@ -12,7 +12,7 @@ import logoImage from '../assets/zb-autocare-logo.jpg';
 // Data structure for tracker entries
 interface TrackerEntry {
   id: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense';
   amount: number;
   customer?: string;
   contact?: string;
@@ -31,6 +31,7 @@ interface TrackerEntry {
     used: boolean;
     applied: boolean;
   };
+  monthYear?: string; // For monthly entries, stores "YYYY-MM"
 }
 
 // Customer data structure
@@ -51,7 +52,8 @@ const IncomeExpenseTracker: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [trackerData, setTrackerData] = useState<TrackerData>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [entryType, setEntryType] = useState<'income' | 'expense'>('income');
+  const [entryType, setEntryType] = useState<'income' | 'expense' | 'monthly-income' | 'monthly-expense'>('income');
+  const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
@@ -187,10 +189,10 @@ const IncomeExpenseTracker: React.FC = () => {
         let dailyExpense = 0;
         
         entries.forEach(entry => {
-          if (entry.type === 'income') {
+          if (entry.type === 'income' || entry.type === 'monthly-income') {
             totalIncome += entry.amount;
             dailyIncome += entry.amount;
-          } else {
+          } else if (entry.type === 'expense' || entry.type === 'monthly-expense') {
             totalExpense += entry.amount;
             dailyExpense += entry.amount;
           }
@@ -280,14 +282,20 @@ const IncomeExpenseTracker: React.FC = () => {
         return null;
       }
       
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL instead of public URL for private bucket
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('bill-uploads')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
+      
+      if (signedUrlError) {
+        console.error('Signed URL error:', signedUrlError);
+        return null;
+      }
       
       return {
         name: file.name,
         path: filePath,
-        url: publicUrl
+        url: signedUrlData.signedUrl
       };
     } catch (error) {
       console.error('File upload error:', error);
@@ -297,7 +305,34 @@ const IncomeExpenseTracker: React.FC = () => {
     }
   };
 
-  // Add new entry
+  // Get fresh signed URL for viewing bills
+  const getSignedUrl = async (filePath: string): Promise<string | null> => {
+    try {
+      const { data: signedUrlData, error } = await supabase.storage
+        .from('bill-uploads')
+        .createSignedUrl(filePath, 60 * 60); // 1 hour expiry for viewing
+      
+      if (error) {
+        console.error('Error getting signed URL:', error);
+        return null;
+      }
+      
+      return signedUrlData.signedUrl;
+    } catch (error) {
+      console.error('Error getting signed URL:', error);
+      return null;
+    }
+  };
+
+  // Check if monthly entry exists for current month
+  const hasMonthlyEntry = (type: 'monthly-income' | 'monthly-expense') => {
+    const currentMonthYear = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
+    return Object.values(trackerData).some(entries => 
+      entries.some(entry => entry.type === type && entry.monthYear === currentMonthYear)
+    );
+  };
+
+  // Add new entry (daily)
   const handleAddEntry = async () => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
@@ -360,6 +395,61 @@ const IncomeExpenseTracker: React.FC = () => {
     });
     setUploadedFile(null);
     setEntryType('income');
+    setIsModalOpen(false);
+  };
+
+  // Add new monthly entry
+  const handleAddMonthlyEntry = async () => {
+    if (!formData.amount || parseFloat(formData.amount) <= 0) return;
+
+    const currentMonthYear = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Check if monthly entry already exists
+    if (hasMonthlyEntry(entryType as 'monthly-income' | 'monthly-expense')) {
+      alert(`Monthly ${entryType.split('-')[1]} entry already exists for this month!`);
+      return;
+    }
+
+    let billFile = undefined;
+    
+    // Handle file upload if file is selected
+    if (uploadedFile) {
+      const uploadResult = await handleFileUpload(uploadedFile);
+      if (uploadResult) {
+        billFile = uploadResult;
+      }
+    }
+
+    const newEntry: TrackerEntry = {
+      id: Date.now().toString(),
+      type: entryType,
+      amount: parseFloat(formData.amount),
+      note: formData.note,
+      timestamp: Date.now(),
+      monthYear: currentMonthYear,
+      billFile
+    };
+
+    // Add to first day of month for organization
+    const firstDayOfMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-01`;
+    
+    setTrackerData(prev => ({
+      ...prev,
+      [firstDayOfMonth]: [...(prev[firstDayOfMonth] || []), newEntry]
+    }));
+
+    // Reset form
+    setFormData({
+      customer: '',
+      contact: '',
+      car: '',
+      note: '',
+      amount: '',
+      customerSource: ''
+    });
+    setUploadedFile(null);
+    setEntryType('monthly-income');
+    setIsMonthlyModalOpen(false);
   };
 
   // Delete entry
@@ -722,8 +812,8 @@ const IncomeExpenseTracker: React.FC = () => {
   const today = new Date().toISOString().split('T')[0];
   const monthlyStats = getMonthlyStats();
   const selectedDateEntries = trackerData[selectedDate] || [];
-  const incomeEntries = selectedDateEntries.filter(entry => entry.type === 'income');
-  const expenseEntries = selectedDateEntries.filter(entry => entry.type === 'expense');
+  const incomeEntries = selectedDateEntries.filter(entry => entry.type === 'income' || entry.type === 'monthly-income');
+  const expenseEntries = selectedDateEntries.filter(entry => entry.type === 'expense' || entry.type === 'monthly-expense');
   
   // Calculate daily totals for selected date
   const dailyIncome = incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
@@ -1001,9 +1091,18 @@ const IncomeExpenseTracker: React.FC = () => {
                 />
                 <div className="flex gap-2">
                   {(userRole === 'owner' || userRole === 'editor') && (
-                    <Button onClick={() => setIsModalOpen(true)} size="sm">
-                      New Entry
-                    </Button>
+                    <>
+                      <Button onClick={() => setIsModalOpen(true)} size="sm">
+                        New Entry
+                      </Button>
+                      <Button 
+                        onClick={() => setIsMonthlyModalOpen(true)} 
+                        size="sm" 
+                        variant="outline"
+                      >
+                        Monthly
+                      </Button>
+                    </>
                   )}
                   <Button variant="outline" onClick={handleViewDay} size="sm">
                     View Day
@@ -1063,8 +1162,9 @@ const IncomeExpenseTracker: React.FC = () => {
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                       <thead>
+                        <thead>
                          <tr className="border-b border-border">
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
                            {userRole !== 'staff' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>}
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
@@ -1073,31 +1173,45 @@ const IncomeExpenseTracker: React.FC = () => {
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
                            {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>}
                          </tr>
-                       </thead>
-                      <tbody>
+                        </thead>
+                       <tbody>
                          {incomeEntries.map(entry => (
                            <tr key={entry.id} className="border-b border-border">
-                             <td className="p-3 text-sm">{entry.customer}</td>
-                             {userRole !== 'staff' && <td className="p-3 text-sm">{entry.contact}</td>}
-                             <td className="p-3 text-sm">{entry.car}</td>
+                             <td className="p-3 text-sm">
+                               <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                 entry.type === 'monthly-income' 
+                                   ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' 
+                                   : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
+                               }`}>
+                                 {entry.type === 'monthly-income' ? 'Monthly' : 'Daily'}
+                               </span>
+                             </td>
+                             <td className="p-3 text-sm">{entry.customer || (entry.type === 'monthly-income' ? '-' : '')}</td>
+                             {userRole !== 'staff' && <td className="p-3 text-sm">{entry.contact || (entry.type === 'monthly-income' ? '-' : '')}</td>}
+                             <td className="p-3 text-sm">{entry.car || (entry.type === 'monthly-income' ? '-' : '')}</td>
                              <td className="p-3 text-sm">{entry.note}</td>
                              {userRole === 'owner' && <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>}
-                             <td className="p-3">
-                               {entry.billFile ? (
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={() => setViewImageDialog({ 
-                                     open: true, 
-                                     url: entry.billFile!.url, 
-                                     name: entry.billFile!.name 
-                                   })}
-                                   className="flex items-center gap-1"
-                                 >
-                                   <Eye className="h-3 w-3" />
-                                   View
-                                 </Button>
-                               ) : (
+                              <td className="p-3">
+                                {entry.billFile ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={async () => {
+                                      const signedUrl = await getSignedUrl(entry.billFile!.path);
+                                      if (signedUrl) {
+                                        setViewImageDialog({ 
+                                          open: true, 
+                                          url: signedUrl, 
+                                          name: entry.billFile!.name 
+                                        });
+                                      }
+                                    }}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    View
+                                  </Button>
+                                ) : (
                                  <span className="text-xs text-muted-foreground">No file</span>
                                )}
                              </td>
@@ -1137,32 +1251,67 @@ const IncomeExpenseTracker: React.FC = () => {
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
-                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
-                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {expenseEntries.map(entry => (
-                            <tr key={entry.id} className="border-b border-border">
-                              <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
-                              <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
-                              <td className="p-3">
-                                <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                  Delete
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                          {expenseEntries.length === 0 && (
-                            <tr>
-                              <td colSpan={3} className="p-6 text-center text-muted-foreground italic">
-                                No expense entries for this date
-                              </td>
-                            </tr>
-                          )}
+                         <thead>
+                           <tr className="border-b border-border">
+                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
+                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
+                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
+                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
+                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
+                           </tr>
+                         </thead>
+                         <tbody>
+                           {expenseEntries.map(entry => (
+                             <tr key={entry.id} className="border-b border-border">
+                               <td className="p-3 text-sm">
+                                 <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                   entry.type === 'monthly-expense' 
+                                     ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200' 
+                                     : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200'
+                                 }`}>
+                                   {entry.type === 'monthly-expense' ? 'Monthly' : 'Daily'}
+                                 </span>
+                               </td>
+                               <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
+                               <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
+                               <td className="p-3">
+                                 {entry.billFile ? (
+                                   <Button
+                                     size="sm"
+                                     variant="outline"
+                                     onClick={async () => {
+                                       const signedUrl = await getSignedUrl(entry.billFile!.path);
+                                       if (signedUrl) {
+                                         setViewImageDialog({ 
+                                           open: true, 
+                                           url: signedUrl, 
+                                           name: entry.billFile!.name 
+                                         });
+                                       }
+                                     }}
+                                     className="flex items-center gap-1"
+                                   >
+                                     <Eye className="h-3 w-3" />
+                                     View
+                                   </Button>
+                                 ) : (
+                                  <span className="text-xs text-muted-foreground">No file</span>
+                                )}
+                               </td>
+                               <td className="p-3">
+                                 <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                   Delete
+                                 </Button>
+                               </td>
+                             </tr>
+                           ))}
+                           {expenseEntries.length === 0 && (
+                             <tr>
+                               <td colSpan={5} className="p-6 text-center text-muted-foreground italic">
+                                 No expense entries for this date
+                               </td>
+                             </tr>
+                           )}
                         </tbody>
                       </table>
                     </div>
@@ -1384,6 +1533,89 @@ const IncomeExpenseTracker: React.FC = () => {
             </div>
           </div>
         </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Monthly Entry Modal */}
+      {(userRole === 'owner' || userRole === 'editor') && (
+        <Dialog open={isMonthlyModalOpen} onOpenChange={setIsMonthlyModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Monthly Entry - {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Select value={entryType} onValueChange={(value: 'monthly-income' | 'monthly-expense') => setEntryType(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly-income">Monthly Income</SelectItem>
+                  {userRole === 'owner' && <SelectItem value="monthly-expense">Monthly Expense</SelectItem>}
+                </SelectContent>
+              </Select>
+
+              {/* Show warning if monthly entry already exists */}
+              {hasMonthlyEntry(entryType as 'monthly-income' | 'monthly-expense') && (
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    ⚠️ Monthly {entryType.split('-')[1]} entry already exists for this month!
+                  </p>
+                </div>
+              )}
+
+              <Input
+                placeholder={entryType === 'monthly-income' ? 'Income Description (e.g., Used Oil Sale)' : 'Expense Description (e.g., Electricity Bill)'}
+                value={formData.note}
+                onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
+              />
+
+              <Input
+                type="number"
+                placeholder="Amount"
+                value={formData.amount}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+              />
+
+              {/* File Upload Section */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  Upload Bill Picture (Optional)
+                </label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  {uploadedFile && (
+                    <div className="flex items-center gap-1 text-sm text-green-600">
+                      <FileImage className="h-4 w-4" />
+                      <span>Ready</span>
+                    </div>
+                  )}
+                </div>
+                {uploadedFile && (
+                  <p className="text-xs text-muted-foreground">
+                    Selected: {uploadedFile.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleAddMonthlyEntry} 
+                  className="flex-1"
+                  disabled={isUploading || hasMonthlyEntry(entryType as 'monthly-income' | 'monthly-expense')}
+                >
+                  {isUploading ? 'Uploading...' : 'Add Monthly Entry'}
+                </Button>
+                <Button variant="outline" onClick={() => setIsMonthlyModalOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
         </Dialog>
       )}
 
