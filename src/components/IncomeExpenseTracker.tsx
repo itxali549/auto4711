@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
 
 // Data structure for tracker entries
@@ -20,6 +21,11 @@ interface TrackerEntry {
   timestamp: number;
   customerCode?: string;
   customerSource?: string;
+  billFile?: {
+    name: string;
+    path: string;
+    url: string;
+  };
   newCustomerDiscount?: {
     eligible: boolean;
     used: boolean;
@@ -60,6 +66,13 @@ const IncomeExpenseTracker: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Customer | null>(null);
   const [showInvoice, setShowInvoice] = useState(false);
   const [monthlySearchQuery, setMonthlySearchQuery] = useState('');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [viewImageDialog, setViewImageDialog] = useState<{ open: boolean; url: string; name: string }>({
+    open: false,
+    url: '',
+    name: ''
+  });
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -248,12 +261,57 @@ const IncomeExpenseTracker: React.FC = () => {
     });
   };
 
+  // Handle file upload
+  const handleFileUpload = async (file: File): Promise<{ name: string; path: string; url: string } | null> => {
+    if (!user) return null;
+    
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('bill-uploads')
+        .upload(filePath, file);
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        return null;
+      }
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('bill-uploads')
+        .getPublicUrl(filePath);
+      
+      return {
+        name: file.name,
+        path: filePath,
+        url: publicUrl
+      };
+    } catch (error) {
+      console.error('File upload error:', error);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Add new entry
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
     let customerCode = '';
     let customerDiscount = undefined;
+    let billFile = undefined;
+    
+    // Handle file upload if file is selected
+    if (uploadedFile) {
+      const uploadResult = await handleFileUpload(uploadedFile);
+      if (uploadResult) {
+        billFile = uploadResult;
+      }
+    }
     
     if (entryType === 'income' && formData.customer && formData.contact) {
       const { code, isNewCustomer } = generateCustomerCode(formData.customer, formData.contact);
@@ -282,6 +340,7 @@ const IncomeExpenseTracker: React.FC = () => {
       timestamp: Date.now(),
       customerCode,
       customerSource: formData.customerSource,
+      billFile,
       newCustomerDiscount: customerDiscount
     };
 
@@ -299,6 +358,7 @@ const IncomeExpenseTracker: React.FC = () => {
       amount: '',
       customerSource: ''
     });
+    setUploadedFile(null);
     setEntryType('income');
   };
 
@@ -1003,45 +1063,65 @@ const IncomeExpenseTracker: React.FC = () => {
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-border">
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
-                          {userRole !== 'staff' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>}
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Note</th>
-                          {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>}
-                          {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>}
-                        </tr>
-                      </thead>
+                       <thead>
+                         <tr className="border-b border-border">
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
+                           {userRole !== 'staff' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>}
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Note</th>
+                           {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>}
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
+                           {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>}
+                         </tr>
+                       </thead>
                       <tbody>
-                        {incomeEntries.map(entry => (
-                          <tr key={entry.id} className="border-b border-border">
-                            <td className="p-3 text-sm">{entry.customer}</td>
-                            {userRole !== 'staff' && <td className="p-3 text-sm">{entry.contact}</td>}
-                            <td className="p-3 text-sm">{entry.car}</td>
-                            <td className="p-3 text-sm">{entry.note}</td>
-                            {userRole === 'owner' && <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>}
-                            {userRole === 'owner' && (
-                              <td className="p-3">
-                                <div className="flex gap-2">
-                                  <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
-                                    Invoice
-                                  </Button>
-                                  <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                    Delete
-                                  </Button>
-                                </div>
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                        {incomeEntries.length === 0 && (
-                          <tr>
-                            <td colSpan={userRole === 'owner' ? 6 : userRole === 'staff' ? 3 : 4} className="p-6 text-center text-muted-foreground italic">
-                              No income entries for this date
-                            </td>
-                          </tr>
-                        )}
+                         {incomeEntries.map(entry => (
+                           <tr key={entry.id} className="border-b border-border">
+                             <td className="p-3 text-sm">{entry.customer}</td>
+                             {userRole !== 'staff' && <td className="p-3 text-sm">{entry.contact}</td>}
+                             <td className="p-3 text-sm">{entry.car}</td>
+                             <td className="p-3 text-sm">{entry.note}</td>
+                             {userRole === 'owner' && <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>}
+                             <td className="p-3">
+                               {entry.billFile ? (
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={() => setViewImageDialog({ 
+                                     open: true, 
+                                     url: entry.billFile!.url, 
+                                     name: entry.billFile!.name 
+                                   })}
+                                   className="flex items-center gap-1"
+                                 >
+                                   <Eye className="h-3 w-3" />
+                                   View
+                                 </Button>
+                               ) : (
+                                 <span className="text-xs text-muted-foreground">No file</span>
+                               )}
+                             </td>
+                             {userRole === 'owner' && (
+                               <td className="p-3">
+                                 <div className="flex gap-2">
+                                   <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
+                                     Invoice
+                                   </Button>
+                                   <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                     Delete
+                                   </Button>
+                                 </div>
+                               </td>
+                             )}
+                           </tr>
+                         ))}
+                         {incomeEntries.length === 0 && (
+                           <tr>
+                             <td colSpan={userRole === 'owner' ? 7 : userRole === 'staff' ? 4 : 5} className="p-6 text-center text-muted-foreground italic">
+                               No income entries for this date
+                             </td>
+                           </tr>
+                         )}
                       </tbody>
                     </table>
                   </div>
@@ -1264,9 +1344,39 @@ const IncomeExpenseTracker: React.FC = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
             />
 
+            {/* File Upload Section */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">
+                Upload Bill Picture (Optional)
+              </label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
+                  className="flex-1"
+                />
+                {uploadedFile && (
+                  <div className="flex items-center gap-1 text-sm text-green-600">
+                    <FileImage className="h-4 w-4" />
+                    <span>Ready</span>
+                  </div>
+                )}
+              </div>
+              {uploadedFile && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {uploadedFile.name}
+                </p>
+              )}
+            </div>
+
             <div className="flex gap-2">
-              <Button onClick={handleAddEntry} className="flex-1">
-                Add Entry
+              <Button 
+                onClick={handleAddEntry} 
+                className="flex-1"
+                disabled={isUploading}
+              >
+                {isUploading ? 'Uploading...' : 'Add Entry'}
               </Button>
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                 Cancel
@@ -1274,8 +1384,33 @@ const IncomeExpenseTracker: React.FC = () => {
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+        </Dialog>
       )}
+
+      {/* Image Viewing Dialog */}
+      <Dialog open={viewImageDialog.open} onOpenChange={(open) => setViewImageDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Bill Image - {viewImageDialog.name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center">
+            <img 
+              src={viewImageDialog.url} 
+              alt="Bill Image" 
+              className="max-w-full max-h-[70vh] object-contain rounded-lg"
+              onError={(e) => {
+                console.error('Failed to load image:', viewImageDialog.url);
+                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiM5OTk5OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjx0ZXh0IHg9IjEyIiB5PSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0IiBmaWxsPSIjOTk5OTk5Ij5GYWlsZWQgdG8gbG9hZDwvdGV4dD4KPHN2Zz4K';
+              }}
+            />
+          </div>
+          <div className="flex justify-center mt-4">
+            <Button variant="outline" onClick={() => setViewImageDialog(prev => ({ ...prev, open: false }))}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
