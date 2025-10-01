@@ -5,9 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Upload, Eye, FileImage } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
+import LeadSheet from './LeadSheet';
 
 // Data structure for tracker entries
 interface TrackerEntry {
@@ -54,6 +55,7 @@ const IncomeExpenseTracker: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [entryType, setEntryType] = useState<'income' | 'expense' | 'monthly-income' | 'monthly-expense'>('income');
   const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
+  const [showLeadSheet, setShowLeadSheet] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
@@ -75,6 +77,11 @@ const IncomeExpenseTracker: React.FC = () => {
     url: '',
     name: ''
   });
+
+  // Helper function to capitalize first letter of each word
+  const capitalizeWords = (str: string) => {
+    return str.replace(/\b\w/g, char => char.toUpperCase());
+  };
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -848,6 +855,11 @@ const IncomeExpenseTracker: React.FC = () => {
 
   const filteredMonthlyEntries = getFilteredMonthlyEntries();
 
+  // Show Lead Sheet if selected
+  if (showLeadSheet) {
+    return <LeadSheet trackerData={trackerData} onBack={() => setShowLeadSheet(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
@@ -1043,21 +1055,31 @@ const IncomeExpenseTracker: React.FC = () => {
                   ))}
                 </div>
                 {userRole === 'owner' && (
-                  <div className="flex gap-2 mt-3">
-                    <Button size="sm" variant="outline" onClick={handleExport}>
-                      Export
+                  <div className="flex flex-col gap-2 mt-3">
+                    <Button 
+                      size="sm" 
+                      onClick={() => setShowLeadSheet(true)}
+                      className="w-full flex items-center gap-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      Lead Sheet
                     </Button>
-                    <label className="cursor-pointer">
-                      <Button size="sm" variant="outline" asChild>
-                        <span>Import</span>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={handleExport} className="flex-1">
+                        Export
                       </Button>
-                      <input
-                        type="file"
-                        accept=".json"
-                        onChange={handleImport}
-                        className="hidden"
-                      />
-                    </label>
+                      <label className="cursor-pointer flex-1">
+                        <Button size="sm" variant="outline" asChild className="w-full">
+                          <span>Import</span>
+                        </Button>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleImport}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -1386,17 +1408,26 @@ const IncomeExpenseTracker: React.FC = () => {
                 <Input
                   placeholder="Customer Name"
                   value={formData.customer}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customer: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, customer: capitalizeWords(e.target.value) }))}
                 />
-                <Input
-                  placeholder="Contact/Phone"
-                  value={formData.contact}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
-                />
+                <div>
+                  <Input
+                    placeholder="Contact/Phone (11 digits)"
+                    value={formData.contact}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 11);
+                      setFormData(prev => ({ ...prev, contact: value }));
+                    }}
+                    maxLength={11}
+                  />
+                  {formData.contact && formData.contact.length !== 11 && (
+                    <p className="text-xs text-destructive mt-1">Contact must be exactly 11 digits</p>
+                  )}
+                </div>
                 <Input
                   placeholder="Car Details"
                   value={formData.car}
-                  onChange={(e) => setFormData(prev => ({ ...prev, car: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, car: capitalizeWords(e.target.value) }))}
                 />
               </>
             )}
@@ -1404,7 +1435,7 @@ const IncomeExpenseTracker: React.FC = () => {
             <Input
               placeholder={entryType === 'income' ? 'Service Note' : 'Expense Title'}
               value={formData.note}
-              onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, note: capitalizeWords(e.target.value) }))}
             />
 
             {/* Customer Source Radio Buttons for Income */}
@@ -1523,7 +1554,7 @@ const IncomeExpenseTracker: React.FC = () => {
               <Button 
                 onClick={handleAddEntry} 
                 className="flex-1"
-                disabled={isUploading}
+                disabled={isUploading || (entryType === 'income' && formData.contact.length !== 11)}
               >
                 {isUploading ? 'Uploading...' : 'Add Entry'}
               </Button>
@@ -1566,7 +1597,7 @@ const IncomeExpenseTracker: React.FC = () => {
               <Input
                 placeholder={entryType === 'monthly-income' ? 'Income Description (e.g., Used Oil Sale)' : 'Expense Description (e.g., Electricity Bill)'}
                 value={formData.note}
-                onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, note: capitalizeWords(e.target.value) }))}
               />
 
               <Input
