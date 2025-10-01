@@ -1,7 +1,7 @@
-import AppSelection from "./AppSelection";
+import IncomeExpenseTracker from "@/components/IncomeExpenseTracker";
 
 const Index = () => {
-  return <AppSelection />;
+  return <IncomeExpenseTracker />;
 };
 
 export default Index;
