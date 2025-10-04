@@ -123,7 +123,7 @@ Extend with custom colors in `tailwind.config.ts`:
 ```typescript
 interface TrackerEntry {
   id: string;
-  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense';
+  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense' | 'marketing';
   amount: number;
   customer?: string;
   contact?: string;
@@ -173,6 +173,7 @@ type TrackerData = Record<string, TrackerEntry[]>; // { 'YYYY-MM-DD': TrackerEnt
 - Quick Actions:
   - "Monthly Income" button (owner/editor only)
   - "Monthly Expense" button (owner/editor only)
+  - "Marketing Budget" button (owner/editor only)
   - "Lead Sheet" button (owner only) with Users icon
 - Export/Import buttons (owner only)
 
@@ -186,6 +187,7 @@ type TrackerData = Record<string, TrackerEntry[]>; // { 'YYYY-MM-DD': TrackerEnt
   - Net Daily Profit
 - Add Entry buttons (Income/Expense) - owner/editor only
 - Income entries table
+- Marketing Budget entries table (when entries exist)
 - Expense entries table
 - Monthly search with filter input
 - Monthly entries listing
@@ -228,9 +230,16 @@ type TrackerData = Record<string, TrackerEntry[]>; // { 'YYYY-MM-DD': TrackerEnt
 - Note/Description (auto-capitalize words)
 - Amount (required, number)
 - Bill Upload (optional)
-- **Restriction**: Only ONE monthly income and ONE monthly expense allowed per month per type
+- **No Limit**: Users can add multiple monthly income and monthly expense entries
 - Stored with `monthYear` field as "YYYY-MM"
 - Added to the 1st day of the month in tracker data
+
+### Marketing Budget Entry Form Fields:
+- Description (auto-capitalize words) - e.g., "Buying Shirts", "Installing Billboard"
+- Amount (required, number)
+- Bill Upload (optional)
+- Added to selected date in tracker data
+- Type: 'marketing'
 
 ### Input Validation Rules:
 1. **Auto-Capitalize**: Customer, Car, and Note fields auto-capitalize first letter of every word
@@ -240,7 +249,6 @@ type TrackerData = Record<string, TrackerEntry[]>; // { 'YYYY-MM-DD': TrackerEnt
    - Disable submit button if not exactly 11 digits
    - maxLength={11}
 3. **Amount**: Must be positive number
-4. **Monthly Entries**: Check if entry already exists for current month before allowing add
 
 ### File Upload to Supabase
 - Upload to `bill-uploads` bucket
@@ -254,7 +262,7 @@ type TrackerData = Record<string, TrackerEntry[]>; // { 'YYYY-MM-DD': TrackerEnt
 ## 6. CUSTOMER SEARCH & INVOICING
 
 ### Customer Search
-- Search by customer code (e.g., "ZB0001") or phone number
+- Search by customer code (e.g., "ZB0001"), phone number, or customer name
 - Display results showing:
   - Customer Code
   - Customer Name
@@ -332,9 +340,17 @@ Similar to invoice but:
 1. **Total Income**: Sum all income + monthly-income for current month
 2. **Total Expense**: Sum all expense + monthly-expense for current month
 3. **Gross Profit**: Income - Expense
-4. **Marketing Budget**: Sum of (daily profit * 0.2) for each day where daily profit > 0
+4. **Marketing Budget**: Sum of all 'marketing' type entries for current month
 5. **Net Profit**: Gross Profit - Marketing Budget
 6. **Saved Dates**: Count of dates with at least one entry
+
+### Marketing Budget Section:
+- Separate entry type: 'marketing'
+- Users can add multiple marketing expenses per day/month
+- Examples: Buying shirts, Installing billboards, etc.
+- Tracked separately from general expenses
+- Displays in its own table when entries exist
+- Affects Net Profit calculation
 
 ### Monthly Search/Filter:
 - Input field to filter entries by customer, note, car, or contact
@@ -428,9 +444,10 @@ Similar to invoice but:
 ## 12. SPECIFIC BUSINESS LOGIC
 
 ### Marketing Budget Calculation:
-- Calculated per day: 20% of daily gross profit (if positive)
-- Monthly total: Sum of all daily marketing budgets
-- Only counted when daily profit is positive
+- Sum of all 'marketing' type entries
+- Tracked separately as individual expenses
+- Can add unlimited marketing entries
+- Examples: shirts, billboards, ads, etc.
 - Net profit = Gross profit - Marketing budget
 
 ### New Customer Discount Tracking:
@@ -535,9 +552,9 @@ All invoices use inline HTML/CSS with:
    - Show "No customers found" in Lead Sheet search
    - Show "No results" for customer search
 
-2. **Prevent Duplicates**:
-   - Monthly entries: Only one per type per month
-   - Alert user if trying to add duplicate monthly entry
+2. **No Duplicate Restrictions**:
+   - Users can add unlimited monthly income and expense entries
+   - Users can add unlimited marketing budget entries
 
 3. **File Upload Errors**:
    - Handle upload failures gracefully
