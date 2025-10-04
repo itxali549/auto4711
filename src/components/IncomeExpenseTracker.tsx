@@ -1147,6 +1147,14 @@ const IncomeExpenseTracker: React.FC = () => {
                       >
                         Monthly
                       </Button>
+                      <Button 
+                        onClick={() => setIsMarketingModalOpen(true)} 
+                        size="sm" 
+                        variant="outline"
+                        className="bg-orange-600/10 hover:bg-orange-600/20 text-orange-600"
+                      >
+                        Marketing
+                      </Button>
                     </>
                   )}
                   <Button variant="outline" onClick={handleViewDay} size="sm">
