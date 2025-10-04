@@ -13,7 +13,7 @@ import LeadSheet from './LeadSheet';
 // Data structure for tracker entries
 interface TrackerEntry {
   id: string;
-  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense' | 'marketing';
+  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense';
   amount: number;
   customer?: string;
   contact?: string;
@@ -53,9 +53,8 @@ const IncomeExpenseTracker: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [trackerData, setTrackerData] = useState<TrackerData>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [entryType, setEntryType] = useState<'income' | 'expense' | 'monthly-income' | 'monthly-expense' | 'marketing'>('income');
+  const [entryType, setEntryType] = useState<'income' | 'expense' | 'monthly-income' | 'monthly-expense'>('income');
   const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
-  const [isMarketingModalOpen, setIsMarketingModalOpen] = useState(false);
   const [showLeadSheet, setShowLeadSheet] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
@@ -193,15 +192,23 @@ const IncomeExpenseTracker: React.FC = () => {
       if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
         if (entries.length > 0) savedDates++;
         
+        let dailyIncome = 0;
+        let dailyExpense = 0;
+        
         entries.forEach(entry => {
           if (entry.type === 'income' || entry.type === 'monthly-income') {
             totalIncome += entry.amount;
+            dailyIncome += entry.amount;
           } else if (entry.type === 'expense' || entry.type === 'monthly-expense') {
             totalExpense += entry.amount;
-          } else if (entry.type === 'marketing') {
-            totalMarketingBudget += entry.amount;
+            dailyExpense += entry.amount;
           }
         });
+        
+        // Calculate daily marketing budget (20% of daily profit if positive)
+        const dailyGrossProfit = dailyIncome - dailyExpense;
+        const dailyMarketingBudget = Math.max(0, dailyGrossProfit * 0.2);
+        totalMarketingBudget += dailyMarketingBudget;
       }
     });
 
@@ -437,47 +444,6 @@ const IncomeExpenseTracker: React.FC = () => {
     setUploadedFile(null);
     setEntryType('monthly-income');
     setIsMonthlyModalOpen(false);
-  };
-
-  // Add new marketing entry
-  const handleAddMarketingEntry = async () => {
-    if (!formData.amount || parseFloat(formData.amount) <= 0) return;
-
-    let billFile = undefined;
-    
-    // Handle file upload if file is selected
-    if (uploadedFile) {
-      const uploadResult = await handleFileUpload(uploadedFile);
-      if (uploadResult) {
-        billFile = uploadResult;
-      }
-    }
-
-    const newEntry: TrackerEntry = {
-      id: Date.now().toString(),
-      type: 'marketing',
-      amount: parseFloat(formData.amount),
-      note: formData.note,
-      timestamp: Date.now(),
-      billFile
-    };
-
-    setTrackerData(prev => ({
-      ...prev,
-      [selectedDate]: [...(prev[selectedDate] || []), newEntry]
-    }));
-
-    // Reset form
-    setFormData({
-      customer: '',
-      contact: '',
-      car: '',
-      note: '',
-      amount: '',
-      customerSource: ''
-    });
-    setUploadedFile(null);
-    setIsMarketingModalOpen(false);
   };
 
   // Delete entry
@@ -843,14 +809,13 @@ const IncomeExpenseTracker: React.FC = () => {
   const selectedDateEntries = trackerData[selectedDate] || [];
   const incomeEntries = selectedDateEntries.filter(entry => entry.type === 'income' || entry.type === 'monthly-income');
   const expenseEntries = selectedDateEntries.filter(entry => entry.type === 'expense' || entry.type === 'monthly-expense');
-  const marketingEntries = selectedDateEntries.filter(entry => entry.type === 'marketing');
   
   // Calculate daily totals for selected date
   const dailyIncome = incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const dailyExpense = expenseEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const dailyMarketingBudget = marketingEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const grossDailyProfit = dailyIncome - dailyExpense;
-  const dailyProfit = grossDailyProfit - dailyMarketingBudget;
+  const marketingBudget = Math.max(0, grossDailyProfit * 0.2); // 20% of profit, only if profit is positive
+  const dailyProfit = grossDailyProfit - marketingBudget;
 
   // Filter entries based on monthly search
   const getFilteredMonthlyEntries = () => {
@@ -1147,14 +1112,6 @@ const IncomeExpenseTracker: React.FC = () => {
                       >
                         Monthly
                       </Button>
-                      <Button 
-                        onClick={() => setIsMarketingModalOpen(true)} 
-                        size="sm" 
-                        variant="outline"
-                        className="bg-orange-600/10 hover:bg-orange-600/20 text-orange-600"
-                      >
-                        Marketing
-                      </Button>
                     </>
                   )}
                   <Button variant="outline" onClick={handleViewDay} size="sm">
@@ -1190,7 +1147,8 @@ const IncomeExpenseTracker: React.FC = () => {
                 <Card>
                   <CardContent className="p-4">
                     <div className="text-sm text-muted-foreground">Marketing Budget</div>
-                    <div className="text-xl font-bold text-orange-600">Rs {dailyMarketingBudget.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -1293,70 +1251,6 @@ const IncomeExpenseTracker: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Marketing Budget Table */}
-              {(userRole === 'owner' || userRole === 'editor') && marketingEntries.length > 0 && (
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold text-orange-600">Marketing Budget Entries</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                         <thead>
-                           <tr className="border-b border-border">
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Description</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Amount</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
-                             {(userRole === 'owner' || userRole === 'editor') && (
-                               <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                             )}
-                           </tr>
-                         </thead>
-                         <tbody>
-                           {marketingEntries.map(entry => (
-                             <tr key={entry.id} className="border-b border-border">
-                               <td className="p-3 text-sm">{entry.note || 'Marketing Expense'}</td>
-                               <td className="p-3 text-sm font-medium text-orange-600">Rs {entry.amount}</td>
-                               <td className="p-3">
-                                 {entry.billFile ? (
-                                   <Button
-                                     size="sm"
-                                     variant="outline"
-                                     onClick={async () => {
-                                       const signedUrl = await getSignedUrl(entry.billFile!.path);
-                                       if (signedUrl) {
-                                         setViewImageDialog({ 
-                                           open: true, 
-                                           url: signedUrl, 
-                                           name: entry.billFile!.name 
-                                         });
-                                       }
-                                     }}
-                                     className="flex items-center gap-1"
-                                   >
-                                     <Eye className="h-3 w-3" />
-                                     View
-                                   </Button>
-                                 ) : (
-                                  <span className="text-xs text-muted-foreground">No file</span>
-                                )}
-                               </td>
-                               {(userRole === 'owner' || userRole === 'editor') && (
-                                 <td className="p-3">
-                                   <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                     Delete
-                                   </Button>
-                                 </td>
-                               )}
-                             </tr>
-                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Expense Table */}
               {userRole === 'owner' && (
@@ -1727,70 +1621,6 @@ const IncomeExpenseTracker: React.FC = () => {
                   {isUploading ? 'Uploading...' : 'Add Monthly Entry'}
                 </Button>
                 <Button variant="outline" onClick={() => setIsMonthlyModalOpen(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Marketing Budget Modal */}
-      {(userRole === 'owner' || userRole === 'editor') && (
-        <Dialog open={isMarketingModalOpen} onOpenChange={setIsMarketingModalOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Marketing Budget Entry - {selectedDate}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Marketing Description (e.g., Shirts, Billboard, etc.)"
-                value={formData.note}
-                onChange={(e) => setFormData(prev => ({ ...prev, note: capitalizeWords(e.target.value) }))}
-              />
-
-              <Input
-                type="number"
-                placeholder="Amount"
-                value={formData.amount}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-              />
-
-              {/* File Upload Section */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  Upload Bill Picture (Optional)
-                </label>
-                <div className="flex gap-2 items-center">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
-                    className="flex-1"
-                  />
-                  {uploadedFile && (
-                    <div className="flex items-center gap-1 text-sm text-green-600">
-                      <FileImage className="h-4 w-4" />
-                      <span>Ready</span>
-                    </div>
-                  )}
-                </div>
-                {uploadedFile && (
-                  <p className="text-xs text-muted-foreground">
-                    Selected: {uploadedFile.name}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleAddMarketingEntry} 
-                  className="flex-1"
-                  disabled={isUploading}
-                >
-                  {isUploading ? 'Uploading...' : 'Add Marketing Entry'}
-                </Button>
-                <Button variant="outline" onClick={() => setIsMarketingModalOpen(false)}>
                   Cancel
                 </Button>
               </div>

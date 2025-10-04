@@ -7,7 +7,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 
 interface TrackerEntry {
   id: string;
-  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense' | 'marketing';
+  type: 'income' | 'expense' | 'monthly-income' | 'monthly-expense';
   amount: number;
   customer?: string;
   contact?: string;
