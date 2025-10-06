@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      employees: {
+        Row: {
+          created_at: string
+          daily_salary: number | null
+          employee_code: string
+          id: string
+          is_active: boolean
+          monthly_salary: number
+          name: string
+          reason_for_hiring: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_salary?: number | null
+          employee_code: string
+          id?: string
+          is_active?: boolean
+          monthly_salary: number
+          name: string
+          reason_for_hiring?: string | null
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_salary?: number | null
+          employee_code?: string
+          id?: string
+          is_active?: boolean
+          monthly_salary?: number
+          name?: string
+          reason_for_hiring?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      salary_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_payments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
