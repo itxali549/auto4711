@@ -17,7 +17,7 @@ export type Database = {
       employees: {
         Row: {
           created_at: string
-          daily_salary: number | null
+          daily_wage: number | null
           employee_code: string
           id: string
           is_active: boolean
@@ -25,12 +25,14 @@ export type Database = {
           name: string
           reason_for_hiring: string | null
           role: string
+          salary_type: string
           updated_at: string
           user_id: string
+          weekly_off_day: string | null
         }
         Insert: {
           created_at?: string
-          daily_salary?: number | null
+          daily_wage?: number | null
           employee_code: string
           id?: string
           is_active?: boolean
@@ -38,12 +40,14 @@ export type Database = {
           name: string
           reason_for_hiring?: string | null
           role: string
+          salary_type?: string
           updated_at?: string
           user_id: string
+          weekly_off_day?: string | null
         }
         Update: {
           created_at?: string
-          daily_salary?: number | null
+          daily_wage?: number | null
           employee_code?: string
           id?: string
           is_active?: boolean
@@ -51,8 +55,10 @@ export type Database = {
           name?: string
           reason_for_hiring?: string | null
           role?: string
+          salary_type?: string
           updated_at?: string
           user_id?: string
+          weekly_off_day?: string | null
         }
         Relationships: []
       }

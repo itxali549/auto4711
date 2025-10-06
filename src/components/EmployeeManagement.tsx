@@ -13,8 +13,10 @@ type Employee = {
   name: string;
   role: string;
   reason_for_hiring: string | null;
+  salary_type: 'monthly' | 'daily' | 'mixed';
   monthly_salary: number;
-  daily_salary: number;
+  daily_wage: number | null;
+  weekly_off_day: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -38,7 +40,7 @@ export const EmployeeManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEmployees(data || []);
+      setEmployees((data || []) as Employee[]);
     } catch (error) {
       console.error('Error fetching employees:', error);
       toast({

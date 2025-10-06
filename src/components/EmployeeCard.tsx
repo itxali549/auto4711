@@ -20,8 +20,10 @@ type Employee = {
   name: string;
   role: string;
   reason_for_hiring: string | null;
+  salary_type: 'monthly' | 'daily' | 'mixed';
   monthly_salary: number;
-  daily_salary: number;
+  daily_wage: number | null;
+  weekly_off_day: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -77,14 +79,38 @@ export const EmployeeCard = ({ employee, onPaySalary, onDelete }: EmployeeCardPr
             <span className="text-muted-foreground">Role:</span>
             <span className="font-medium">{employee.role}</span>
           </div>
+          
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Monthly Salary:</span>
-            <span className="font-medium">₹{employee.monthly_salary.toLocaleString('en-IN')}</span>
+            <span className="text-muted-foreground">Salary Type:</span>
+            <Badge variant="secondary" className="text-xs">
+              {employee.salary_type === 'mixed' ? 'Monthly + Daily' : 
+               employee.salary_type === 'monthly' ? 'Monthly' : 'Daily Wage'}
+            </Badge>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Daily Salary:</span>
-            <span className="font-medium">₹{employee.daily_salary.toFixed(2)}</span>
-          </div>
+
+          {(employee.salary_type === 'monthly' || employee.salary_type === 'mixed') && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Monthly Salary:</span>
+              <span className="font-medium">PKR {employee.monthly_salary.toLocaleString('en-PK')}</span>
+            </div>
+          )}
+          
+          {(employee.salary_type === 'daily' || employee.salary_type === 'mixed') && employee.daily_wage && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                {employee.salary_type === 'mixed' ? 'Daily Bonus:' : 'Daily Wage:'}
+              </span>
+              <span className="font-medium">PKR {employee.daily_wage.toLocaleString('en-PK')}</span>
+            </div>
+          )}
+
+          {employee.weekly_off_day && employee.weekly_off_day !== 'none' && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Weekly Off:</span>
+              <span className="font-medium capitalize">{employee.weekly_off_day}</span>
+            </div>
+          )}
+
           {employee.reason_for_hiring && (
             <div className="pt-2 border-t">
               <p className="text-xs text-muted-foreground">
@@ -95,23 +121,49 @@ export const EmployeeCard = ({ employee, onPaySalary, onDelete }: EmployeeCardPr
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onPaySalary(employee.id, employee.daily_salary, 'daily')}
-          >
-            <IndianRupee className="h-3 w-3 mr-1" />
-            Pay Daily
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1"
-            onClick={() => onPaySalary(employee.id, employee.monthly_salary, 'monthly')}
-          >
-            <Calendar className="h-3 w-3 mr-1" />
-            Pay Monthly
-          </Button>
+          {employee.salary_type === 'monthly' && (
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => onPaySalary(employee.id, employee.monthly_salary, 'monthly')}
+            >
+              <Calendar className="h-3 w-3 mr-1" />
+              Pay Monthly
+            </Button>
+          )}
+          
+          {employee.salary_type === 'daily' && employee.daily_wage && (
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => onPaySalary(employee.id, employee.daily_wage!, 'daily')}
+            >
+              <IndianRupee className="h-3 w-3 mr-1" />
+              Pay Daily
+            </Button>
+          )}
+
+          {employee.salary_type === 'mixed' && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() => onPaySalary(employee.id, employee.daily_wage!, 'daily')}
+              >
+                <IndianRupee className="h-3 w-3 mr-1" />
+                Daily
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={() => onPaySalary(employee.id, employee.monthly_salary, 'monthly')}
+              >
+                <Calendar className="h-3 w-3 mr-1" />
+                Monthly
+              </Button>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

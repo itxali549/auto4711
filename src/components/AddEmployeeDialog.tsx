@@ -7,6 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,7 +36,10 @@ export const AddEmployeeDialog = ({
     name: '',
     role: '',
     reason_for_hiring: '',
+    salary_type: 'monthly' as 'monthly' | 'daily' | 'mixed',
     monthly_salary: '',
+    daily_wage: '',
+    weekly_off_day: '' as string,
   });
   const { toast } = useToast();
 
@@ -62,7 +72,10 @@ export const AddEmployeeDialog = ({
         name: formData.name.trim(),
         role: formData.role.trim(),
         reason_for_hiring: formData.reason_for_hiring.trim() || null,
-        monthly_salary: parseFloat(formData.monthly_salary),
+        salary_type: formData.salary_type,
+        monthly_salary: formData.salary_type !== 'daily' ? parseFloat(formData.monthly_salary) : 0,
+        daily_wage: formData.salary_type !== 'monthly' ? parseFloat(formData.daily_wage) : null,
+        weekly_off_day: formData.weekly_off_day || null,
       });
 
       if (error) throw error;
@@ -76,7 +89,10 @@ export const AddEmployeeDialog = ({
         name: '',
         role: '',
         reason_for_hiring: '',
+        salary_type: 'monthly',
         monthly_salary: '',
+        daily_wage: '',
+        weekly_off_day: '',
       });
 
       onEmployeeAdded();
@@ -124,22 +140,78 @@ export const AddEmployeeDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="monthly_salary">Monthly Salary (₹) *</Label>
-            <Input
-              id="monthly_salary"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.monthly_salary}
-              onChange={(e) => setFormData({ ...formData, monthly_salary: e.target.value })}
-              placeholder="Enter monthly salary"
-              required
-            />
-            {formData.monthly_salary && (
-              <p className="text-sm text-muted-foreground">
-                Daily Salary: ₹{(parseFloat(formData.monthly_salary) / 30).toFixed(2)}
-              </p>
-            )}
+            <Label htmlFor="salary_type">Salary Type *</Label>
+            <Select
+              value={formData.salary_type}
+              onValueChange={(value: 'monthly' | 'daily' | 'mixed') => 
+                setFormData({ ...formData, salary_type: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select salary type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Monthly Salary</SelectItem>
+                <SelectItem value="daily">Daily Wage</SelectItem>
+                <SelectItem value="mixed">Mixed (Monthly + Daily)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {(formData.salary_type === 'monthly' || formData.salary_type === 'mixed') && (
+            <div className="space-y-2">
+              <Label htmlFor="monthly_salary">Monthly Salary (PKR) *</Label>
+              <Input
+                id="monthly_salary"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.monthly_salary}
+                onChange={(e) => setFormData({ ...formData, monthly_salary: e.target.value })}
+                placeholder="Enter monthly salary"
+                required={(formData.salary_type === 'monthly' || formData.salary_type === 'mixed')}
+              />
+            </div>
+          )}
+
+          {(formData.salary_type === 'daily' || formData.salary_type === 'mixed') && (
+            <div className="space-y-2">
+              <Label htmlFor="daily_wage">
+                Daily Wage (PKR) * {formData.salary_type === 'mixed' && '(on working days)'}
+              </Label>
+              <Input
+                id="daily_wage"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.daily_wage}
+                onChange={(e) => setFormData({ ...formData, daily_wage: e.target.value })}
+                placeholder="Enter daily wage"
+                required={(formData.salary_type === 'daily' || formData.salary_type === 'mixed')}
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="weekly_off">Weekly Off Day</Label>
+            <Select
+              value={formData.weekly_off_day}
+              onValueChange={(value) => setFormData({ ...formData, weekly_off_day: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select weekly off day" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No weekly off</SelectItem>
+                <SelectItem value="monday">Monday</SelectItem>
+                <SelectItem value="tuesday">Tuesday</SelectItem>
+                <SelectItem value="wednesday">Wednesday</SelectItem>
+                <SelectItem value="thursday">Thursday</SelectItem>
+                <SelectItem value="friday">Friday</SelectItem>
+                <SelectItem value="saturday">Saturday</SelectItem>
+                <SelectItem value="sunday">Sunday</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
