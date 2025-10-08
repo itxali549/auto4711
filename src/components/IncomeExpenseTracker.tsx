@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Upload, Eye, FileImage, Users } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
 import LeadSheet from './LeadSheet';
@@ -56,6 +56,7 @@ const IncomeExpenseTracker: React.FC = () => {
   const [entryType, setEntryType] = useState<'income' | 'expense' | 'monthly-income' | 'monthly-expense'>('income');
   const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
   const [showLeadSheet, setShowLeadSheet] = useState(false);
+  const [showEmployees, setShowEmployees] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
@@ -848,6 +849,24 @@ const IncomeExpenseTracker: React.FC = () => {
     return <LeadSheet trackerData={trackerData} onBack={() => setShowLeadSheet(false)} />;
   }
 
+  // Show Employees if selected
+  if (showEmployees) {
+    const EmployeeManagement = React.lazy(() => import('./EmployeeManagement').then(module => ({ default: module.EmployeeManagement })));
+    return (
+      <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+        <div className="min-h-screen bg-background p-4">
+          <div className="max-w-7xl mx-auto">
+            <Button onClick={() => setShowEmployees(false)} variant="outline" size="sm" className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <EmployeeManagement />
+          </div>
+        </div>
+      </React.Suspense>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
@@ -926,6 +945,18 @@ const IncomeExpenseTracker: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Employees Button */}
+          {userRole === 'owner' && (
+            <Button 
+              onClick={() => setShowEmployees(true)}
+              variant="outline"
+              className="w-full flex items-center gap-2"
+            >
+              <UserCog className="h-4 w-4" />
+              Employees
+            </Button>
+          )}
 
           {/* Calendar */}
           <Card>
@@ -1387,7 +1418,12 @@ const IncomeExpenseTracker: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="income">Income</SelectItem>
-                  {userRole === 'owner' && <SelectItem value="expense">Expense</SelectItem>}
+                  {userRole === 'owner' && (
+                    <>
+                      <SelectItem value="expense">Expense</SelectItem>
+                      <SelectItem value="expense">Salary</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
 
@@ -1569,7 +1605,12 @@ const IncomeExpenseTracker: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly-income">Monthly Income</SelectItem>
-                  {userRole === 'owner' && <SelectItem value="monthly-expense">Monthly Expense</SelectItem>}
+                  {userRole === 'owner' && (
+                    <>
+                      <SelectItem value="monthly-expense">Monthly Expense</SelectItem>
+                      <SelectItem value="monthly-expense">Salary</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
 
