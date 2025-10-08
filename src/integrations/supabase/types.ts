@@ -62,6 +62,39 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          expense_date: string
+          id: string
+          notes: string | null
+          purpose: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          purpose: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          purpose?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       salary_payments: {
         Row: {
           amount: number

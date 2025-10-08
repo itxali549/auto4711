@@ -5,10 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
 import LeadSheet from './LeadSheet';
+import MarketingBudget from './MarketingBudget';
+import { EmployeeManagement } from './EmployeeManagement';
 
 // Data structure for tracker entries
 interface TrackerEntry {
@@ -57,6 +59,7 @@ const IncomeExpenseTracker: React.FC = () => {
   const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
   const [showLeadSheet, setShowLeadSheet] = useState(false);
   const [showEmployees, setShowEmployees] = useState(false);
+  const [showMarketing, setShowMarketing] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
@@ -867,6 +870,24 @@ const IncomeExpenseTracker: React.FC = () => {
     );
   }
 
+  // Show Marketing if selected
+  if (showMarketing) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-7xl mx-auto">
+          <Button onClick={() => setShowMarketing(false)} variant="outline" size="sm" className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <MarketingBudget 
+            monthlyMarketingBudget={monthlyStats.marketingBudget} 
+            currentMonth={currentMonth}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
@@ -946,16 +967,26 @@ const IncomeExpenseTracker: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Employees Button */}
+          {/* Management Buttons */}
           {userRole === 'owner' && (
-            <Button 
-              onClick={() => setShowEmployees(true)}
-              variant="outline"
-              className="w-full flex items-center gap-2"
-            >
-              <UserCog className="h-4 w-4" />
-              Employees
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowEmployees(true)}
+                variant="outline"
+                className="flex-1 flex items-center gap-2"
+              >
+                <UserCog className="h-4 w-4" />
+                Employees
+              </Button>
+              <Button 
+                onClick={() => setShowMarketing(true)}
+                variant="outline"
+                className="flex-1 flex items-center gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                Marketing
+              </Button>
+            </div>
           )}
 
           {/* Calendar */}
