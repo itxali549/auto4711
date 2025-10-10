@@ -344,6 +344,41 @@ const IncomeExpenseTracker: React.FC = () => {
     let customerDiscount = undefined;
     let billFile = undefined;
     
+    // Special handling for Expense Salary
+    if (entryType === 'expense' && formData.note?.toLowerCase() === 'salary' && formData.customer && user) {
+      try {
+        // Fetch employee by name
+        const { data: employees, error: fetchError } = await supabase
+          .from('employees')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .ilike('name', formData.customer.trim());
+        
+        if (fetchError) throw fetchError;
+        
+        if (employees && employees.length > 0) {
+          const employee = employees[0];
+          
+          // Create salary payment record
+          const { error: paymentError } = await supabase
+            .from('salary_payments')
+            .insert({
+              employee_id: employee.id,
+              user_id: user.id,
+              amount: parseFloat(formData.amount),
+              payment_date: selectedDate,
+              payment_type: 'manual',
+              notes: formData.car || ''
+            });
+          
+          if (paymentError) throw paymentError;
+        }
+      } catch (error) {
+        console.error('Error recording salary payment:', error);
+      }
+    }
+    
     // Handle file upload if file is selected
     if (uploadedFile) {
       const uploadResult = await handleFileUpload(uploadedFile);
