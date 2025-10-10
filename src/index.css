@@ -8,109 +8,108 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 24% 8%;
-    --foreground: 210 40% 98%;
+    /* ZB AutoCare Logo Colors - Blue, Black, Gold theme */
+    --background: 220 30% 6%;
+    --foreground: 210 20% 98%;
 
-    --card: 222 20% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 28% 10%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222 20% 12%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 28% 10%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 45 84% 60%;
-    --primary-foreground: 222 47% 11%;
+    /* Primary: Vibrant Blue from logo */
+    --primary: 214 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 16% 18%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary: Gold/Yellow accent from logo */
+    --secondary: 48 100% 50%;
+    --secondary-foreground: 220 30% 6%;
 
-    --muted: 222 16% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 15% 65%;
 
-    --accent: 222 16% 18%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 214 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 222 16% 18%;
-    --input: 222 16% 18%;
-    --ring: 45 84% 60%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 214 100% 50%;
 
     --radius: 0.75rem;
 
-    /* Gold gradients for tracker */
-    --gold-start: 45 84% 76%;
-    --gold-end: 40 75% 37%;
+    /* Gold gradients for tracker - matching logo gold */
+    --gold-start: 48 100% 60%;
+    --gold-end: 45 100% 45%;
     --gold-gradient: linear-gradient(135deg, hsl(var(--gold-start)), hsl(var(--gold-end)));
     
-    /* Income/expense colors */
-    --income: 45 84% 60%;
-    --expense: 0 75% 55%;
+    /* Income/expense colors - using logo palette */
+    --income: 48 100% 50%;
+    --expense: 0 72% 51%;
     
     /* Calendar colors */
     --calendar-today: var(--gold-gradient);
-    --calendar-hover: 222 16% 22%;
+    --calendar-hover: 220 20% 22%;
     
-    /* Shadows */
-    --shadow-gold: 0 10px 30px -10px hsl(var(--gold-start) / 0.3);
-    --shadow-card: 0 8px 30px -8px rgba(0, 0, 0, 0.3);
+    /* Shadows - blue and gold glows */
+    --shadow-blue: 0 10px 40px -10px hsl(214 100% 50% / 0.4);
+    --shadow-gold: 0 10px 30px -10px hsl(48 100% 50% / 0.3);
+    --shadow-card: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 220 30% 8%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 214 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 214 100% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* ZB AutoCare Dark Mode - matching logo theme */
+    --background: 220 30% 6%;
+    --foreground: 210 20% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 28% 10%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 28% 10%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 214 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 48 100% 50%;
+    --secondary-foreground: 220 30% 6%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 214 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 214 100% 50%;
+    
+    --sidebar-background: 220 30% 8%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 214 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 214 100% 50%;
   }
 }
 
