@@ -1227,38 +1227,27 @@ const IncomeExpenseTracker: React.FC = () => {
           {/* Day Panel */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
             {/* Daily Summary */}
-            {userRole === 'owner' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Daily Income</div>
-                    <div className="text-xl font-bold text-income">Rs {dailyIncome}</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Daily Expense</div>
-                    <div className="text-xl font-bold text-expense">Rs {dailyExpense}</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Marketing Budget</div>
-                    <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
-                    <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Net Profit</div>
-                    <div className={`text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
-                      Rs {dailyProfit.toFixed(0)}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">After marketing budget</div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Total Income</div>
+                  <div className="text-xl font-bold text-income">Rs {dailyIncome}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Expense</div>
+                  <div className="text-xl font-bold text-expense">Rs {dailyExpense}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Marketing Budget</div>
+                  <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
+                  <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
+                </CardContent>
+              </Card>
+            </div>
             
             <div className="space-y-6">
               {/* Income Table */}
