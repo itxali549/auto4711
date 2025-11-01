@@ -939,24 +939,9 @@ const IncomeExpenseTracker: React.FC = () => {
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                ZB Tracker
-              </h1>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full capitalize">
-                  {userRole}
-                </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => signOut()}
-                  className="h-8 w-8 p-0"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              ZB Tracker
+            </h1>
             <p className="text-sm text-muted-foreground">Income & Expense • Single file</p>
           </div>
 
@@ -1339,81 +1324,79 @@ const IncomeExpenseTracker: React.FC = () => {
               </Card>
 
               {/* Expense Table */}
-              {userRole === 'owner' && (
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold text-expense">Expense Table</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                         <thead>
-                           <tr className="border-b border-border">
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
-                             <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                           </tr>
-                         </thead>
-                         <tbody>
-                           {expenseEntries.map(entry => (
-                             <tr key={entry.id} className="border-b border-border">
-                               <td className="p-3 text-sm">
-                                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                   entry.type === 'monthly-expense' 
-                                     ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200' 
-                                     : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200'
-                                 }`}>
-                                   {entry.type === 'monthly-expense' ? 'Monthly' : 'Daily'}
-                                 </span>
-                               </td>
-                               <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
-                               <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
-                               <td className="p-3">
-                                 {entry.billFile ? (
-                                   <Button
-                                     size="sm"
-                                     variant="outline"
-                                     onClick={async () => {
-                                       const signedUrl = await getSignedUrl(entry.billFile!.path);
-                                       if (signedUrl) {
-                                         setViewImageDialog({ 
-                                           open: true, 
-                                           url: signedUrl, 
-                                           name: entry.billFile!.name 
-                                         });
-                                       }
-                                     }}
-                                     className="flex items-center gap-1"
-                                   >
-                                     <Eye className="h-3 w-3" />
-                                     View
-                                   </Button>
-                                 ) : (
-                                  <span className="text-xs text-muted-foreground">No file</span>
-                                )}
-                               </td>
-                               <td className="p-3">
-                                 <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                   Delete
+              <Card>
+                <CardContent className="p-0">
+                  <div className="p-4 border-b border-border">
+                    <h3 className="font-semibold text-expense">Expense Table</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                       <thead>
+                         <tr className="border-b border-border">
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         {expenseEntries.map(entry => (
+                           <tr key={entry.id} className="border-b border-border">
+                             <td className="p-3 text-sm">
+                               <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                 entry.type === 'monthly-expense' 
+                                   ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200' 
+                                   : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200'
+                               }`}>
+                                 {entry.type === 'monthly-expense' ? 'Monthly' : 'Daily'}
+                               </span>
+                             </td>
+                             <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
+                             <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
+                             <td className="p-3">
+                               {entry.billFile ? (
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={async () => {
+                                     const signedUrl = await getSignedUrl(entry.billFile!.path);
+                                     if (signedUrl) {
+                                       setViewImageDialog({ 
+                                         open: true, 
+                                         url: signedUrl, 
+                                         name: entry.billFile!.name 
+                                       });
+                                     }
+                                   }}
+                                   className="flex items-center gap-1"
+                                 >
+                                   <Eye className="h-3 w-3" />
+                                   View
                                  </Button>
-                               </td>
-                             </tr>
-                           ))}
-                           {expenseEntries.length === 0 && (
-                             <tr>
-                               <td colSpan={5} className="p-6 text-center text-muted-foreground italic">
-                                 No expense entries for this date
-                               </td>
-                             </tr>
-                           )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                               ) : (
+                                <span className="text-xs text-muted-foreground">No file</span>
+                              )}
+                             </td>
+                             <td className="p-3">
+                               <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                 Delete
+                               </Button>
+                             </td>
+                           </tr>
+                         ))}
+                         {expenseEntries.length === 0 && (
+                           <tr>
+                             <td colSpan={5} className="p-6 text-center text-muted-foreground italic">
+                               No expense entries for this date
+                             </td>
+                           </tr>
+                         )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Monthly Search Results */}
