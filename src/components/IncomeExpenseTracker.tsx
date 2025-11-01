@@ -1212,7 +1212,7 @@ const IncomeExpenseTracker: React.FC = () => {
           {/* Day Panel */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
             {/* Daily Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Total Income</div>
@@ -1230,6 +1230,14 @@ const IncomeExpenseTracker: React.FC = () => {
                   <div className="text-sm text-muted-foreground">Marketing Budget</div>
                   <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
                   <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm text-muted-foreground">Total Profit</div>
+                  <div className={`text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
+                    Rs {dailyProfit.toFixed(0)}
+                  </div>
                 </CardContent>
               </Card>
             </div>
