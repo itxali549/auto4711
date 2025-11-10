@@ -1182,28 +1182,22 @@ const IncomeExpenseTracker: React.FC = () => {
                   className="w-full sm:w-64"
                 />
                 <div className="flex gap-2">
-                  {(userRole === 'owner' || userRole === 'editor') && (
-                    <>
-                      <Button onClick={() => setIsModalOpen(true)} size="sm">
-                        New Entry
-                      </Button>
-                      <Button 
-                        onClick={() => setIsMonthlyModalOpen(true)} 
-                        size="sm" 
-                        variant="outline"
-                      >
-                        Monthly
-                      </Button>
-                    </>
-                  )}
+                  <Button onClick={() => setIsModalOpen(true)} size="sm">
+                    New Entry
+                  </Button>
+                  <Button 
+                    onClick={() => setIsMonthlyModalOpen(true)} 
+                    size="sm" 
+                    variant="outline"
+                  >
+                    Monthly
+                  </Button>
                   <Button variant="outline" onClick={handleViewDay} size="sm">
                     View Day
                   </Button>
-                  {userRole === 'owner' && (
-                    <Button variant="destructive" onClick={handleClearAll} size="sm">
-                      Clear All
-                    </Button>
-                  )}
+                  <Button variant="destructive" onClick={handleClearAll} size="sm">
+                    Clear All
+                  </Button>
                 </div>
               </div>
             </div>
