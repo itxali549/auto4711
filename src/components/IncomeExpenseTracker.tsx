@@ -1445,8 +1445,7 @@ const IncomeExpenseTracker: React.FC = () => {
       </div>
 
       {/* Entry Modal */}
-      {(userRole === 'owner' || userRole === 'editor') && (
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Entry - {selectedDate}</DialogTitle>
@@ -1628,12 +1627,10 @@ const IncomeExpenseTracker: React.FC = () => {
             </div>
           </div>
         </DialogContent>
-        </Dialog>
-      )}
+      </Dialog>
 
       {/* Monthly Entry Modal */}
-      {(userRole === 'owner' || userRole === 'editor') && (
-        <Dialog open={isMonthlyModalOpen} onOpenChange={setIsMonthlyModalOpen}>
+      <Dialog open={isMonthlyModalOpen} onOpenChange={setIsMonthlyModalOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Add Monthly Entry - {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</DialogTitle>
@@ -1707,8 +1704,7 @@ const IncomeExpenseTracker: React.FC = () => {
               </div>
             </div>
           </DialogContent>
-        </Dialog>
-      )}
+      </Dialog>
 
       {/* Image Viewing Dialog */}
       <Dialog open={viewImageDialog.open} onOpenChange={(open) => setViewImageDialog(prev => ({ ...prev, open }))}>
