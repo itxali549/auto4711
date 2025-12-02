@@ -1116,34 +1116,32 @@ const IncomeExpenseTracker: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                {userRole === 'owner' && (
-                  <div className="flex flex-col gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      onClick={() => setShowLeadSheet(true)}
-                      className="w-full flex items-center gap-2"
-                    >
-                      <Users className="h-4 w-4" />
-                      Lead Sheet
+                <div className="flex flex-col gap-2 mt-3">
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowLeadSheet(true)}
+                    className="w-full flex items-center gap-2"
+                  >
+                    <Users className="h-4 w-4" />
+                    Lead Sheet
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={handleExport} className="flex-1">
+                      Export
                     </Button>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={handleExport} className="flex-1">
-                        Export
+                    <label className="cursor-pointer flex-1">
+                      <Button size="sm" variant="outline" asChild className="w-full">
+                        <span>Import</span>
                       </Button>
-                      <label className="cursor-pointer flex-1">
-                        <Button size="sm" variant="outline" asChild className="w-full">
-                          <span>Import</span>
-                        </Button>
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={handleImport}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleImport}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           )}
