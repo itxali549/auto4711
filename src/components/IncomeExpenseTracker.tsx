@@ -50,7 +50,7 @@ interface Customer {
 type TrackerData = Record<string, TrackerEntry[]>;
 
 const IncomeExpenseTracker: React.FC = () => {
-  const { userRole, signOut, user } = useAuth();
+  const { signOut, user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [trackerData, setTrackerData] = useState<TrackerData>({});
@@ -962,25 +962,17 @@ const IncomeExpenseTracker: React.FC = () => {
                   <div className="mt-3 p-3 bg-muted rounded-lg">
                     <div className="text-sm space-y-1">
                       <div><strong>Code:</strong> {searchResults.code}</div>
-                      {userRole !== 'staff' && (
-                        <>
-                          <div><strong>Name:</strong> {searchResults.name}</div>
-                          <div><strong>Phone:</strong> {searchResults.phone}</div>
-                        </>
-                      )}
-                      {userRole === 'owner' && (
-                        <div><strong>Total Amount:</strong> Rs {searchResults.totalAmount}</div>
-                      )}
+                      <div><strong>Name:</strong> {searchResults.name}</div>
+                      <div><strong>Phone:</strong> {searchResults.phone}</div>
+                      <div><strong>Total Amount:</strong> Rs {searchResults.totalAmount}</div>
                     </div>
-                    {userRole === 'owner' && (
-                      <Button
-                        onClick={generateCustomerInvoice}
-                        className="w-full mt-2"
-                        size="sm"
-                      >
-                        Print History Invoice
-                      </Button>
-                    )}
+                    <Button
+                      onClick={generateCustomerInvoice}
+                      className="w-full mt-2"
+                      size="sm"
+                    >
+                      Print History Invoice
+                    </Button>
                   </div>
                 )}
               </div>
@@ -988,26 +980,24 @@ const IncomeExpenseTracker: React.FC = () => {
           </Card>
 
           {/* Management Buttons */}
-          {userRole === 'owner' && (
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setShowEmployees(true)}
-                variant="outline"
-                className="flex-1 flex items-center gap-2"
-              >
-                <UserCog className="h-4 w-4" />
-                Employees
-              </Button>
-              <Button 
-                onClick={() => setShowMarketing(true)}
-                variant="outline"
-                className="flex-1 flex items-center gap-2"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Marketing
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowEmployees(true)}
+              variant="outline"
+              className="flex-1 flex items-center gap-2"
+            >
+              <UserCog className="h-4 w-4" />
+              Employees
+            </Button>
+            <Button 
+              onClick={() => setShowMarketing(true)}
+              variant="outline"
+              className="flex-1 flex items-center gap-2"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Marketing
+            </Button>
+          </div>
 
           {/* Calendar */}
           <Card>
@@ -1102,49 +1092,47 @@ const IncomeExpenseTracker: React.FC = () => {
           </div>
 
           {/* Customer List */}
-          {userRole !== 'staff' && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-3">Customer List</h3>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {getCustomers().slice(0, 5).map((customer, index) => (
-                    <div key={index} className="text-sm p-2 bg-muted rounded">
-                      <div className="font-medium">{customer.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {customer.code} • {userRole === 'owner' ? customer.phone : ''}
-                      </div>
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">Customer List</h3>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {getCustomers().slice(0, 5).map((customer, index) => (
+                  <div key={index} className="text-sm p-2 bg-muted rounded">
+                    <div className="font-medium">{customer.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {customer.code} • {customer.phone}
                     </div>
-                  ))}
-                </div>
-                <div className="flex flex-col gap-2 mt-3">
-                  <Button 
-                    size="sm" 
-                    onClick={() => setShowLeadSheet(true)}
-                    className="w-full flex items-center gap-2"
-                  >
-                    <Users className="h-4 w-4" />
-                    Lead Sheet
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleExport} className="flex-1">
-                      Export
-                    </Button>
-                    <label className="cursor-pointer flex-1">
-                      <Button size="sm" variant="outline" asChild className="w-full">
-                        <span>Import</span>
-                      </Button>
-                      <input
-                        type="file"
-                        accept=".json"
-                        onChange={handleImport}
-                        className="hidden"
-                      />
-                    </label>
                   </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-2 mt-3">
+                <Button 
+                  size="sm" 
+                  onClick={() => setShowLeadSheet(true)}
+                  className="w-full flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Lead Sheet
+                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={handleExport} className="flex-1">
+                    Export
+                  </Button>
+                  <label className="cursor-pointer flex-1">
+                    <Button size="sm" variant="outline" asChild className="w-full">
+                      <span>Import</span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImport}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Panel - Main */}
@@ -1239,12 +1227,12 @@ const IncomeExpenseTracker: React.FC = () => {
                          <tr className="border-b border-border">
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
-                           {userRole !== 'staff' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>}
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Note</th>
-                           {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>}
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
                            <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
-                           {userRole === 'owner' && <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>}
+                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
                          </tr>
                         </thead>
                        <tbody>
@@ -1260,10 +1248,10 @@ const IncomeExpenseTracker: React.FC = () => {
                                </span>
                              </td>
                              <td className="p-3 text-sm">{entry.customer || (entry.type === 'monthly-income' ? '-' : '')}</td>
-                             {userRole !== 'staff' && <td className="p-3 text-sm">{entry.contact || (entry.type === 'monthly-income' ? '-' : '')}</td>}
+                             <td className="p-3 text-sm">{entry.contact || (entry.type === 'monthly-income' ? '-' : '')}</td>
                              <td className="p-3 text-sm">{entry.car || (entry.type === 'monthly-income' ? '-' : '')}</td>
                              <td className="p-3 text-sm">{entry.note}</td>
-                             {userRole === 'owner' && <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>}
+                             <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>
                               <td className="p-3">
                                 {entry.billFile ? (
                                   <Button
@@ -1288,23 +1276,21 @@ const IncomeExpenseTracker: React.FC = () => {
                                  <span className="text-xs text-muted-foreground">No file</span>
                                )}
                              </td>
-                             {userRole === 'owner' && (
-                               <td className="p-3">
-                                 <div className="flex gap-2">
-                                   <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
-                                     Invoice
-                                   </Button>
-                                   <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                     Delete
-                                   </Button>
-                                 </div>
-                               </td>
-                             )}
+                             <td className="p-3">
+                               <div className="flex gap-2">
+                                 <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
+                                   Invoice
+                                 </Button>
+                                 <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                   Delete
+                                 </Button>
+                               </div>
+                             </td>
                            </tr>
                          ))}
                          {incomeEntries.length === 0 && (
                            <tr>
-                             <td colSpan={userRole === 'owner' ? 7 : userRole === 'staff' ? 4 : 5} className="p-6 text-center text-muted-foreground italic">
+                             <td colSpan={8} className="p-6 text-center text-muted-foreground italic">
                                No income entries for this date
                              </td>
                            </tr>
