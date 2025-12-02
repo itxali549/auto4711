@@ -1072,42 +1072,34 @@ const IncomeExpenseTracker: React.FC = () => {
           </Card>
 
           {/* Monthly Summary */}
-          {userRole === 'owner' && (
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <Card>
-                <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Income</div>
-                  <div className="font-bold text-income">Rs {monthlyStats.income}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Expense</div>
-                  <div className="font-bold text-expense">Rs {monthlyStats.expense}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Marketing</div>
-                  <div className="font-bold text-orange-600">Rs {monthlyStats.marketingBudget.toFixed(0)}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Net Profit</div>
-                  <div className={`font-bold ${monthlyStats.profit >= 0 ? 'text-income' : 'text-expense'}`}>
-                    Rs {monthlyStats.profit.toFixed(0)}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="col-span-2">
-                <CardContent className="p-3">
-                  <div className="text-xs text-muted-foreground">Saved Dates</div>
-                  <div className="font-bold">{monthlyStats.savedDates}</div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <Card>
+              <CardContent className="p-3">
+                <div className="text-xs text-muted-foreground">Income</div>
+                <div className="font-bold text-income">Rs {monthlyStats.income}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="text-xs text-muted-foreground">Expense</div>
+                <div className="font-bold text-expense">Rs {monthlyStats.expense}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="text-xs text-muted-foreground">Marketing</div>
+                <div className="font-bold text-orange-600">Rs {monthlyStats.marketingBudget.toFixed(0)}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="text-xs text-muted-foreground">Net Profit</div>
+                <div className={`font-bold ${monthlyStats.profit >= 0 ? 'text-income' : 'text-expense'}`}>
+                  Rs {monthlyStats.profit.toFixed(0)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Customer List */}
           {userRole !== 'staff' && (
@@ -1457,12 +1449,7 @@ const IncomeExpenseTracker: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="income">Income</SelectItem>
-                  {userRole === 'owner' && (
-                    <>
-                      <SelectItem value="expense">Expense</SelectItem>
-                      <SelectItem value="expense">Salary</SelectItem>
-                    </>
-                  )}
+                  <SelectItem value="expense">Expense</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -1642,12 +1629,7 @@ const IncomeExpenseTracker: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly-income">Monthly Income</SelectItem>
-                  {userRole === 'owner' && (
-                    <>
-                      <SelectItem value="monthly-expense">Monthly Expense</SelectItem>
-                      <SelectItem value="monthly-expense">Salary</SelectItem>
-                    </>
-                  )}
+                  <SelectItem value="monthly-expense">Monthly Expense</SelectItem>
                 </SelectContent>
               </Select>
 
