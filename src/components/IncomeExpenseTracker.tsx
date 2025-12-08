@@ -5,12 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
 import LeadSheet from './LeadSheet';
 import MarketingBudget from './MarketingBudget';
 import { EmployeeManagement } from './EmployeeManagement';
+import FollowUpList from './FollowUpList';
+import { Badge } from './ui/badge';
 
 // Data structure for tracker entries
 interface TrackerEntry {
@@ -35,6 +37,10 @@ interface TrackerEntry {
     applied: boolean;
   };
   monthYear?: string; // For monthly entries, stores "YYYY-MM"
+  // New fields for service tracking
+  registrationNumber?: string;
+  serviceType?: string;
+  currentKm?: number;
 }
 
 // Customer data structure
@@ -60,13 +66,18 @@ const IncomeExpenseTracker: React.FC = () => {
   const [showLeadSheet, setShowLeadSheet] = useState(false);
   const [showEmployees, setShowEmployees] = useState(false);
   const [showMarketing, setShowMarketing] = useState(false);
+  const [showFollowUps, setShowFollowUps] = useState(false);
+  const [doneFollowUps, setDoneFollowUps] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
     car: '',
     note: '',
     amount: '',
-    customerSource: ''
+    customerSource: '',
+    registrationNumber: '',
+    serviceType: '',
+    currentKm: ''
   });
   const [customerDiscountData, setCustomerDiscountData] = useState<Record<string, { eligible: boolean; used: boolean; applied: boolean }>>({});
   const [customerCodes, setCustomerCodes] = useState<Record<string, string>>({});
@@ -91,11 +102,15 @@ const IncomeExpenseTracker: React.FC = () => {
   useEffect(() => {
     const savedData = localStorage.getItem('zb-tracker-data');
     const savedCodes = localStorage.getItem('zb-customer-codes');
+    const savedDoneFollowUps = localStorage.getItem('zb-done-followups');
     if (savedData) {
       setTrackerData(JSON.parse(savedData));
     }
     if (savedCodes) {
       setCustomerCodes(JSON.parse(savedCodes));
+    }
+    if (savedDoneFollowUps) {
+      setDoneFollowUps(JSON.parse(savedDoneFollowUps));
     }
   }, []);
 
@@ -109,6 +124,11 @@ const IncomeExpenseTracker: React.FC = () => {
     localStorage.setItem('zb-customer-codes', JSON.stringify(customerCodes));
   }, [customerCodes]);
 
+  // Save done follow-ups to localStorage
+  useEffect(() => {
+    localStorage.setItem('zb-done-followups', JSON.stringify(doneFollowUps));
+  }, [doneFollowUps]);
+
   // Load and save customer discount data
   useEffect(() => {
     const savedDiscountData = localStorage.getItem('zb-customer-discounts');
@@ -120,6 +140,52 @@ const IncomeExpenseTracker: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('zb-customer-discounts', JSON.stringify(customerDiscountData));
   }, [customerDiscountData]);
+
+  // Handle marking follow-up as done
+  const handleMarkFollowUpDone = (followUpId: string) => {
+    setDoneFollowUps(prev => [...prev, followUpId]);
+  };
+
+  // Calculate pending follow-ups count for badge
+  const getPendingFollowUpsCount = () => {
+    const customerServices: Record<string, { daysUntil: number; id: string }> = {};
+    
+    Object.entries(trackerData).forEach(([date, entries]) => {
+      entries.forEach(entry => {
+        if (entry.type === 'income' && entry.customer && entry.contact) {
+          const key = `${entry.customer}-${entry.contact}`.toLowerCase();
+          const id = `${key}-${date}`;
+          
+          if (doneFollowUps.includes(id)) return;
+          
+          if (!customerServices[key] || new Date(date) > new Date(customerServices[key].id.split('-').slice(-1)[0])) {
+            const currentKm = entry.currentKm || 0;
+            const serviceInterval = 10000; // Default interval
+            const nextServiceKm = currentKm + serviceInterval;
+            const kmRemaining = nextServiceKm - currentKm;
+            const monthsUntilService = kmRemaining / 3750;
+            const daysUntilService = Math.round(monthsUntilService * 30);
+            
+            const lastDate = new Date(date);
+            const estimatedDate = new Date(lastDate);
+            estimatedDate.setDate(estimatedDate.getDate() + daysUntilService);
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const estDateNormalized = new Date(estimatedDate);
+            estDateNormalized.setHours(0, 0, 0, 0);
+            
+            const daysFromToday = Math.round((estDateNormalized.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            
+            customerServices[key] = { daysUntil: daysFromToday, id };
+          }
+        }
+      });
+    });
+    
+    // Count overdue and due soon
+    return Object.values(customerServices).filter(s => s.daysUntil <= 7).length;
+  };
 
   // Generate unique customer code and check if new customer
   const generateCustomerCode = (customerName: string, phone: string): { code: string; isNewCustomer: boolean } => {
@@ -415,7 +481,10 @@ const IncomeExpenseTracker: React.FC = () => {
       customerCode,
       customerSource: formData.customerSource,
       billFile,
-      newCustomerDiscount: customerDiscount
+      newCustomerDiscount: customerDiscount,
+      registrationNumber: formData.registrationNumber,
+      serviceType: formData.serviceType,
+      currentKm: formData.currentKm ? parseInt(formData.currentKm) : undefined
     };
 
     setTrackerData(prev => ({
@@ -430,7 +499,10 @@ const IncomeExpenseTracker: React.FC = () => {
       car: '',
       note: '',
       amount: '',
-      customerSource: ''
+      customerSource: '',
+      registrationNumber: '',
+      serviceType: '',
+      currentKm: ''
     });
     setUploadedFile(null);
     setEntryType('income');
@@ -478,7 +550,10 @@ const IncomeExpenseTracker: React.FC = () => {
       car: '',
       note: '',
       amount: '',
-      customerSource: ''
+      customerSource: '',
+      registrationNumber: '',
+      serviceType: '',
+      currentKm: ''
     });
     setUploadedFile(null);
     setEntryType('monthly-income');
@@ -923,6 +998,20 @@ const IncomeExpenseTracker: React.FC = () => {
     );
   }
 
+  // Show Follow-ups if selected
+  if (showFollowUps) {
+    return (
+      <FollowUpList 
+        trackerData={trackerData} 
+        onBack={() => setShowFollowUps(false)}
+        onMarkDone={handleMarkFollowUpDone}
+        doneFollowUps={doneFollowUps}
+      />
+    );
+  }
+
+  const pendingFollowUpsCount = getPendingFollowUpsCount();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
@@ -1106,10 +1195,26 @@ const IncomeExpenseTracker: React.FC = () => {
                 ))}
               </div>
               <div className="flex flex-col gap-2 mt-3">
+                {/* Follow-Up Button with Badge */}
+                <Button 
+                  size="sm" 
+                  onClick={() => setShowFollowUps(true)}
+                  className="w-full flex items-center justify-center gap-2 relative"
+                  variant={pendingFollowUpsCount > 0 ? "default" : "outline"}
+                >
+                  <Bell className="h-4 w-4" />
+                  Follow-Up
+                  {pendingFollowUpsCount > 0 && (
+                    <Badge variant="destructive" className="ml-1 h-5 min-w-5 flex items-center justify-center text-xs">
+                      {pendingFollowUpsCount}
+                    </Badge>
+                  )}
+                </Button>
                 <Button 
                   size="sm" 
                   onClick={() => setShowLeadSheet(true)}
                   className="w-full flex items-center gap-2"
+                  variant="outline"
                 >
                   <Users className="h-4 w-4" />
                   Lead Sheet
@@ -1463,6 +1568,40 @@ const IncomeExpenseTracker: React.FC = () => {
                   value={formData.car}
                   onChange={(e) => setFormData(prev => ({ ...prev, car: capitalizeWords(e.target.value) }))}
                 />
+                {/* Service Tracking Fields */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Registration # (e.g., ABC-123)"
+                    value={formData.registrationNumber}
+                    onChange={(e) => setFormData(prev => ({ ...prev, registrationNumber: e.target.value.toUpperCase() }))}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Current KM"
+                    value={formData.currentKm}
+                    onChange={(e) => setFormData(prev => ({ ...prev, currentKm: e.target.value }))}
+                  />
+                </div>
+                <Select 
+                  value={formData.serviceType} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, serviceType: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Service Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Oil Change">Oil Change</SelectItem>
+                    <SelectItem value="General Service">General Service</SelectItem>
+                    <SelectItem value="Brake Service">Brake Service</SelectItem>
+                    <SelectItem value="AC Service">AC Service</SelectItem>
+                    <SelectItem value="Tire Service">Tire Service</SelectItem>
+                    <SelectItem value="Engine Repair">Engine Repair</SelectItem>
+                    <SelectItem value="Transmission">Transmission Service</SelectItem>
+                    <SelectItem value="Electrical">Electrical Work</SelectItem>
+                    <SelectItem value="Body Work">Body Work</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </>
             )}
 
