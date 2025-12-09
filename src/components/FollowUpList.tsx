@@ -3,7 +3,8 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
-import { ArrowLeft, Phone, MessageCircle, CheckCircle, AlertTriangle, Clock, Search } from 'lucide-react';
+import { Label } from './ui/label';
+import { ArrowLeft, Phone, MessageCircle, CheckCircle, AlertTriangle, Clock, Search, Settings } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 interface TrackerEntry {
@@ -60,8 +61,8 @@ interface FollowUpListProps {
   doneFollowUps: string[];
 }
 
-// Service intervals in KM
-const SERVICE_INTERVALS: Record<string, number> = {
+// Default service intervals in KM
+const DEFAULT_SERVICE_INTERVALS: Record<string, number> = {
   'oil change': 5000,
   'oil': 5000,
   'engine oil': 5000,
@@ -89,6 +90,12 @@ const SERVICE_INTERVALS: Record<string, number> = {
 // Average monthly KM in Karachi
 const AVG_MONTHLY_KM = 3750; // Average of 3500-4000
 
+// Load custom interval from localStorage
+const getCustomDefaultInterval = (): number => {
+  const saved = localStorage.getItem('followup_default_km_interval');
+  return saved ? parseInt(saved, 10) : 5000;
+};
+
 const FollowUpList: React.FC<FollowUpListProps> = ({ 
   trackerData, 
   onBack, 
@@ -99,17 +106,32 @@ const FollowUpList: React.FC<FollowUpListProps> = ({
   const [showMessageDialog, setShowMessageDialog] = useState(false);
   const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(null);
   const [filter, setFilter] = useState<'all' | 'due' | 'overdue' | 'upcoming'>('all');
+  const [showSettings, setShowSettings] = useState(false);
+  const [defaultKmInterval, setDefaultKmInterval] = useState(getCustomDefaultInterval);
+  const [tempKmInterval, setTempKmInterval] = useState(defaultKmInterval.toString());
 
   // Calculate next service based on service type
   const getServiceInterval = (serviceType: string): number => {
     const normalizedType = serviceType.toLowerCase().trim();
     
-    for (const [key, interval] of Object.entries(SERVICE_INTERVALS)) {
-      if (normalizedType.includes(key)) {
+    // Check for specific service types first
+    for (const [key, interval] of Object.entries(DEFAULT_SERVICE_INTERVALS)) {
+      if (key !== 'default' && normalizedType.includes(key)) {
         return interval;
       }
     }
-    return SERVICE_INTERVALS.default;
+    // Return custom default interval
+    return defaultKmInterval;
+  };
+
+  // Save settings
+  const handleSaveSettings = () => {
+    const value = parseInt(tempKmInterval, 10);
+    if (value > 0) {
+      setDefaultKmInterval(value);
+      localStorage.setItem('followup_default_km_interval', value.toString());
+      setShowSettings(false);
+    }
   };
 
   // Calculate estimated date based on KM difference and average monthly usage
@@ -289,7 +311,47 @@ Thank you for choosing ZB Autocare! 🚘`;
             </Button>
             <h1 className="text-xl font-bold">Follow-Up List</h1>
           </div>
+          <Button onClick={() => setShowSettings(true)} variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
         </div>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettings} onOpenChange={setShowSettings}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Follow-Up Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="defaultKm">Default Service Interval (KM)</Label>
+                <Input
+                  id="defaultKm"
+                  type="number"
+                  value={tempKmInterval}
+                  onChange={(e) => setTempKmInterval(e.target.value)}
+                  placeholder="e.g., 5000"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This value will be used for services that don't have a specific interval defined.
+                  Current: {defaultKmInterval.toLocaleString()} KM
+                </p>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => {
+                  setTempKmInterval(defaultKmInterval.toString());
+                  setShowSettings(false);
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveSettings}>
+                  Save
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
