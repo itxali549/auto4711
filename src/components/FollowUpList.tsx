@@ -110,17 +110,8 @@ const FollowUpList: React.FC<FollowUpListProps> = ({
   const [defaultKmInterval, setDefaultKmInterval] = useState(getCustomDefaultInterval);
   const [tempKmInterval, setTempKmInterval] = useState(defaultKmInterval.toString());
 
-  // Calculate next service based on service type
-  const getServiceInterval = (serviceType: string): number => {
-    const normalizedType = serviceType.toLowerCase().trim();
-    
-    // Check for specific service types first
-    for (const [key, interval] of Object.entries(DEFAULT_SERVICE_INTERVALS)) {
-      if (key !== 'default' && normalizedType.includes(key)) {
-        return interval;
-      }
-    }
-    // Return custom default interval
+  // Calculate next service - always use custom interval
+  const getServiceInterval = (): number => {
     return defaultKmInterval;
   };
 
@@ -179,7 +170,7 @@ const FollowUpList: React.FC<FollowUpListProps> = ({
           
           // Update if this is a more recent entry for this customer
           if (!customerServices[key] || new Date(date) > new Date(customerServices[key].lastServiceDate)) {
-            const serviceInterval = getServiceInterval(serviceType);
+            const serviceInterval = getServiceInterval();
             const nextServiceKm = currentKm + serviceInterval;
             const { date: estimatedDate, daysUntil } = calculateEstimatedDate(currentKm, nextServiceKm, date);
             
