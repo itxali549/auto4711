@@ -214,7 +214,7 @@ const FollowUpList: React.FC<FollowUpListProps> = ({
     return Object.values(customerServices)
       .filter(f => !f.isDone)
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
-  }, [trackerData, doneFollowUps]);
+  }, [trackerData, doneFollowUps, defaultKmInterval]);
 
   // Filter follow-ups
   const filteredFollowUps = useMemo(() => {
