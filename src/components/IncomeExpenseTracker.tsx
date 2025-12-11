@@ -1573,24 +1573,17 @@ const IncomeExpenseTracker: React.FC = () => {
                   )}
                 </div>
                 <Input
-                  placeholder="Car Details"
+                  placeholder="Car Name"
                   value={formData.car}
                   onChange={(e) => setFormData(prev => ({ ...prev, car: capitalizeWords(e.target.value) }))}
                 />
                 {/* Service Tracking Fields */}
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    placeholder="Registration # (e.g., ABC-123)"
-                    value={formData.registrationNumber}
-                    onChange={(e) => setFormData(prev => ({ ...prev, registrationNumber: e.target.value.toUpperCase() }))}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Current KM"
-                    value={formData.currentKm}
-                    onChange={(e) => setFormData(prev => ({ ...prev, currentKm: e.target.value }))}
-                  />
-                </div>
+                <Input
+                  type="number"
+                  placeholder="Current KM"
+                  value={formData.currentKm}
+                  onChange={(e) => setFormData(prev => ({ ...prev, currentKm: e.target.value }))}
+                />
                 <Select 
                   value={formData.serviceType} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, serviceType: value }))}
