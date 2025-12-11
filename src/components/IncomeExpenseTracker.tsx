@@ -1071,39 +1071,43 @@ const IncomeExpenseTracker: React.FC = () => {
           {/* Management Buttons */}
           <Card>
             <CardContent className="p-3">
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => setShowEmployees(true)}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 flex items-center gap-1"
-                >
-                  <UserCog className="h-4 w-4" />
-                  Employee
-                </Button>
-                <Button 
-                  onClick={() => setShowMarketing(true)}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 flex items-center gap-1"
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  Marketing
-                </Button>
-                <Button 
-                  onClick={() => setShowFollowUps(true)}
-                  size="sm"
-                  className="flex-1 flex items-center gap-1 relative"
-                  variant={pendingFollowUpsCount > 0 ? "default" : "outline"}
-                >
-                  <Bell className="h-4 w-4" />
-                  Follow-Up
-                  {pendingFollowUpsCount > 0 && (
-                    <Badge variant="destructive" className="ml-1 h-5 min-w-5 flex items-center justify-center text-xs">
-                      {pendingFollowUpsCount}
-                    </Badge>
-                  )}
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => setShowEmployees(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 flex items-center gap-1"
+                  >
+                    <UserCog className="h-4 w-4" />
+                    Employee
+                  </Button>
+                  <Button 
+                    onClick={() => setShowMarketing(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 flex items-center gap-1"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    Marketing
+                  </Button>
+                </div>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={() => setShowFollowUps(true)}
+                    size="sm"
+                    className="flex items-center gap-1 relative"
+                    variant={pendingFollowUpsCount > 0 ? "default" : "outline"}
+                  >
+                    <Bell className="h-4 w-4" />
+                    Follow-Up
+                    {pendingFollowUpsCount > 0 && (
+                      <Badge variant="destructive" className="ml-1 h-5 min-w-5 flex items-center justify-center text-xs">
+                        {pendingFollowUpsCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
