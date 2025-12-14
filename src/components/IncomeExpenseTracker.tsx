@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp, Bell } from 'lucide-react';
+import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp, Bell, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import logoImage from '../assets/zb-autocare-logo.jpg';
 import LeadSheet from './LeadSheet';
@@ -13,7 +13,9 @@ import MarketingBudget from './MarketingBudget';
 import { EmployeeManagement } from './EmployeeManagement';
 import FollowUpList from './FollowUpList';
 import { Badge } from './ui/badge';
-
+import MobileEntryCard from './MobileEntryCard';
+import MobileActionMenu from './MobileActionMenu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 // Data structure for tracker entries
 interface TrackerEntry {
   id: string;
@@ -68,6 +70,9 @@ const IncomeExpenseTracker: React.FC = () => {
   const [showMarketing, setShowMarketing] = useState(false);
   const [showFollowUps, setShowFollowUps] = useState(false);
   const [doneFollowUps, setDoneFollowUps] = useState<string[]>([]);
+  // Mobile-specific state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [formData, setFormData] = useState({
     customer: '',
     contact: '',
@@ -1014,15 +1019,64 @@ const IncomeExpenseTracker: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
-        {/* Left Panel */}
-        <div className="bg-card border-r border-border p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
+      {/* Mobile Header with Hamburger */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsSidebarOpen(true)}
+          className="h-10 w-10"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+        <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          ZB Tracker
+        </h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={signOut}
+          className="h-10 w-10"
+        >
+          <LogOut className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex min-h-screen pt-14 lg:pt-0">
+        {/* Left Panel - Sidebar */}
+        <div className={`
+          fixed lg:relative inset-y-0 left-0 z-50 w-[85%] max-w-[340px] lg:w-[340px]
+          bg-card border-r border-border p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:block
+        `}>
+          {/* Close button for mobile */}
+          <div className="lg:hidden flex justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(false)}
+              className="h-10 w-10"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          
           {/* Brand Logo */}
           <div className="flex items-center justify-center">
             <img 
               src={logoImage} 
               alt="ZB Autocare Logo" 
-              className="w-24 h-24 object-contain rounded-xl shadow-lg"
+              className="w-20 h-20 lg:w-24 lg:h-24 object-contain rounded-xl shadow-lg"
             />
           </div>
 
@@ -1112,67 +1166,101 @@ const IncomeExpenseTracker: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Calendar */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={() => navigateMonth('prev')}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors"
-                >
-                  ←
-                </button>
-                <h3 className="font-semibold">
-                  {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </h3>
-                <button
-                  onClick={() => navigateMonth('next')}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors"
-                >
-                  →
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-7 gap-1 text-xs font-medium text-muted-foreground mb-2">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center p-1">{day}</div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-7 gap-1">
-                {generateCalendarDays().map((day, index) => {
-                  if (day === null) {
-                    return <div key={index} className="p-2"></div>;
-                  }
-                  
-                  const dateStr = getDateString(day);
-                  const isToday = dateStr === today;
-                  const isSelected = dateStr === selectedDate;
-                  const { hasIncome, hasExpense } = getDateIndicators(day);
-                  
-                  return (
+          {/* Calendar - Collapsible on mobile */}
+          <Collapsible open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <Card>
+              <CollapsibleTrigger asChild className="lg:hidden">
+                <CardContent className="p-4 cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">
+                      {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    {isCalendarOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  </div>
+                </CardContent>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="lg:block">
+                <CardContent className="p-4 pt-0 lg:pt-4">
+                  {/* Desktop calendar header */}
+                  <div className="hidden lg:flex items-center justify-between mb-4">
                     <button
-                      key={day}
-                      onClick={() => handleDateClick(day)}
-                      className={`p-2 text-sm rounded-lg border transition-all relative ${
-                        isToday
-                          ? 'bg-gradient-to-br from-primary to-accent text-white shadow-lg'
-                          : isSelected
-                          ? 'bg-primary/20 border-primary'
-                          : 'hover:bg-muted border-transparent'
-                      }`}
+                      onClick={() => navigateMonth('prev')}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
                     >
-                      {day}
-                      <div className="flex gap-1 justify-center mt-1">
-                        {hasIncome && <div className="w-1 h-1 bg-primary rounded-full"></div>}
-                        {hasExpense && <div className="w-1 h-1 bg-destructive rounded-full"></div>}
-                      </div>
+                      ←
                     </button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                    <h3 className="font-semibold">
+                      {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    <button
+                      onClick={() => navigateMonth('next')}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    >
+                      →
+                    </button>
+                  </div>
+                  
+                  {/* Mobile calendar navigation */}
+                  <div className="lg:hidden flex items-center justify-between mb-4">
+                    <button
+                      onClick={() => navigateMonth('prev')}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() => navigateMonth('next')}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    >
+                      →
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-7 gap-1 text-xs font-medium text-muted-foreground mb-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div key={day} className="text-center p-1">{day}</div>
+                    ))}
+                  </div>
+                  
+                  <div className="grid grid-cols-7 gap-1">
+                    {generateCalendarDays().map((day, index) => {
+                      if (day === null) {
+                        return <div key={index} className="p-2"></div>;
+                      }
+                      
+                      const dateStr = getDateString(day);
+                      const isToday = dateStr === today;
+                      const isSelected = dateStr === selectedDate;
+                      const { hasIncome, hasExpense } = getDateIndicators(day);
+                      
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => {
+                            handleDateClick(day);
+                            setIsSidebarOpen(false);
+                          }}
+                          className={`p-1.5 lg:p-2 text-xs lg:text-sm rounded-lg border transition-all relative ${
+                            isToday
+                              ? 'bg-gradient-to-br from-primary to-accent text-white shadow-lg'
+                              : isSelected
+                              ? 'bg-primary/20 border-primary'
+                              : 'hover:bg-muted border-transparent'
+                          }`}
+                        >
+                          {day}
+                          <div className="flex gap-0.5 lg:gap-1 justify-center mt-0.5 lg:mt-1">
+                            {hasIncome && <div className="w-1 h-1 bg-primary rounded-full"></div>}
+                            {hasExpense && <div className="w-1 h-1 bg-destructive rounded-full"></div>}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Monthly Summary */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -1250,11 +1338,11 @@ const IncomeExpenseTracker: React.FC = () => {
         </div>
 
         {/* Right Panel - Main */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 min-w-0">
           {/* Top Bar */}
-          <div className="bg-card border-b border-border p-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
+          <div className="bg-card border-b border-border p-3 lg:p-4">
+            <div className="flex flex-col gap-3">
+              <div className="hidden lg:block">
                 <h2 className="text-lg font-semibold">
                   {new Date(selectedDate).toLocaleDateString('en-US', { 
                     weekday: 'long', 
@@ -1265,15 +1353,28 @@ const IncomeExpenseTracker: React.FC = () => {
                 </h2>
               </div>
               
-              {/* Monthly Search Bar */}
-              <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+              {/* Mobile date display */}
+              <div className="lg:hidden">
+                <h2 className="text-sm font-semibold text-center">
+                  {new Date(selectedDate).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </h2>
+              </div>
+              
+              {/* Search and Actions */}
+              <div className="flex flex-col gap-2">
                 <Input
                   placeholder="Search monthly entries..."
                   value={monthlySearchQuery}
                   onChange={(e) => setMonthlySearchQuery(e.target.value)}
-                  className="w-full sm:w-64"
+                  className="w-full h-10"
                 />
-                <div className="flex gap-2">
+                
+                {/* Desktop buttons */}
+                <div className="hidden lg:flex gap-2">
                   <Button onClick={() => setIsModalOpen(true)} size="sm">
                     New Entry
                   </Button>
@@ -1291,199 +1392,265 @@ const IncomeExpenseTracker: React.FC = () => {
                     Clear All
                   </Button>
                 </div>
+                
+                {/* Mobile buttons */}
+                <div className="flex lg:hidden gap-2">
+                  <Button 
+                    onClick={() => setIsModalOpen(true)} 
+                    className="flex-1 h-11 text-sm"
+                  >
+                    + New Entry
+                  </Button>
+                  <MobileActionMenu
+                    onMonthly={() => setIsMonthlyModalOpen(true)}
+                    onViewDay={handleViewDay}
+                    onClearAll={handleClearAll}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Day Panel */}
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-            {/* Daily Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="flex-1 p-3 lg:p-6 overflow-y-auto">
+            {/* Daily Summary - Stack on mobile */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 mb-4 lg:mb-6">
               <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Total Income</div>
-                  <div className="text-xl font-bold text-income">Rs {dailyIncome}</div>
+                <CardContent className="p-3 lg:p-4">
+                  <div className="text-xs lg:text-sm text-muted-foreground">Income</div>
+                  <div className="text-base lg:text-xl font-bold text-income">Rs {dailyIncome}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Expense</div>
-                  <div className="text-xl font-bold text-expense">Rs {dailyExpense}</div>
+                <CardContent className="p-3 lg:p-4">
+                  <div className="text-xs lg:text-sm text-muted-foreground">Expense</div>
+                  <div className="text-base lg:text-xl font-bold text-expense">Rs {dailyExpense}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Marketing Budget</div>
-                  <div className="text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
-                  <div className="text-xs text-muted-foreground mt-1">20% of gross profit</div>
+                <CardContent className="p-3 lg:p-4">
+                  <div className="text-xs lg:text-sm text-muted-foreground">Marketing</div>
+                  <div className="text-base lg:text-xl font-bold text-orange-600">Rs {marketingBudget.toFixed(0)}</div>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Total Profit</div>
-                  <div className={`text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
+                <CardContent className="p-3 lg:p-4">
+                  <div className="text-xs lg:text-sm text-muted-foreground">Profit</div>
+                  <div className={`text-base lg:text-xl font-bold ${dailyProfit >= 0 ? 'text-income' : 'text-expense'}`}>
                     Rs {dailyProfit.toFixed(0)}
                   </div>
                 </CardContent>
               </Card>
             </div>
             
-            <div className="space-y-6">
-              {/* Income Table */}
+            <div className="space-y-4 lg:space-y-6">
+              {/* Income Section */}
               <Card>
                 <CardContent className="p-0">
-                  <div className="p-4 border-b border-border">
-                    <h3 className="font-semibold text-income">Income Table</h3>
+                  <div className="p-3 lg:p-4 border-b border-border">
+                    <h3 className="font-semibold text-income text-sm lg:text-base">Income ({incomeEntries.length})</h3>
                   </div>
-                  <div className="overflow-x-auto">
+                  
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden p-3">
+                    {incomeEntries.length === 0 ? (
+                      <p className="text-center text-muted-foreground italic py-4 text-sm">
+                        No income entries for this date
+                      </p>
+                    ) : (
+                      incomeEntries.map(entry => (
+                        <MobileEntryCard
+                          key={entry.id}
+                          type="income"
+                          entry={entry}
+                          onDelete={handleDeleteEntry}
+                          onViewBill={entry.billFile ? async (path, name) => {
+                            const signedUrl = await getSignedUrl(path);
+                            if (signedUrl) {
+                              setViewImageDialog({ open: true, url: signedUrl, name });
+                            }
+                          } : undefined}
+                        />
+                      ))
+                    )}
+                  </div>
+                  
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full">
-                        <thead>
-                         <tr className="border-b border-border">
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Note</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                         </tr>
-                        </thead>
-                       <tbody>
-                         {incomeEntries.map(entry => (
-                           <tr key={entry.id} className="border-b border-border">
-                             <td className="p-3 text-sm">
-                               <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                 entry.type === 'monthly-income' 
-                                   ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' 
-                                   : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
-                               }`}>
-                                 {entry.type === 'monthly-income' ? 'Monthly' : 'Daily'}
-                               </span>
-                             </td>
-                             <td className="p-3 text-sm">{entry.customer || (entry.type === 'monthly-income' ? '-' : '')}</td>
-                             <td className="p-3 text-sm">{entry.contact || (entry.type === 'monthly-income' ? '-' : '')}</td>
-                             <td className="p-3 text-sm">{entry.car || (entry.type === 'monthly-income' ? '-' : '')}</td>
-                             <td className="p-3 text-sm">{entry.note}</td>
-                             <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>
-                              <td className="p-3">
-                                {entry.billFile ? (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={async () => {
-                                      const signedUrl = await getSignedUrl(entry.billFile!.path);
-                                      if (signedUrl) {
-                                        setViewImageDialog({ 
-                                          open: true, 
-                                          url: signedUrl, 
-                                          name: entry.billFile!.name 
-                                        });
-                                      }
-                                    }}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Eye className="h-3 w-3" />
-                                    View
-                                  </Button>
-                                ) : (
-                                 <span className="text-xs text-muted-foreground">No file</span>
-                               )}
-                             </td>
-                             <td className="p-3">
-                               <div className="flex gap-2">
-                                 <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
-                                   Invoice
-                                 </Button>
-                                 <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                   Delete
-                                 </Button>
-                               </div>
-                             </td>
-                           </tr>
-                         ))}
-                         {incomeEntries.length === 0 && (
-                           <tr>
-                             <td colSpan={8} className="p-6 text-center text-muted-foreground italic">
-                               No income entries for this date
-                             </td>
-                           </tr>
-                         )}
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Customer</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Contact</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Car</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Note</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {incomeEntries.map(entry => (
+                          <tr key={entry.id} className="border-b border-border">
+                            <td className="p-3 text-sm">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                entry.type === 'monthly-income' 
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' 
+                                  : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
+                              }`}>
+                                {entry.type === 'monthly-income' ? 'Monthly' : 'Daily'}
+                              </span>
+                            </td>
+                            <td className="p-3 text-sm">{entry.customer || (entry.type === 'monthly-income' ? '-' : '')}</td>
+                            <td className="p-3 text-sm">{entry.contact || (entry.type === 'monthly-income' ? '-' : '')}</td>
+                            <td className="p-3 text-sm">{entry.car || (entry.type === 'monthly-income' ? '-' : '')}</td>
+                            <td className="p-3 text-sm">{entry.note}</td>
+                            <td className="p-3 text-sm font-medium text-income">Rs {entry.amount}</td>
+                            <td className="p-3">
+                              {entry.billFile ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={async () => {
+                                    const signedUrl = await getSignedUrl(entry.billFile!.path);
+                                    if (signedUrl) {
+                                      setViewImageDialog({ 
+                                        open: true, 
+                                        url: signedUrl, 
+                                        name: entry.billFile!.name 
+                                      });
+                                    }
+                                  }}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  View
+                                </Button>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">No file</span>
+                              )}
+                            </td>
+                            <td className="p-3">
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" onClick={() => handleInvoice(entry)}>
+                                  Invoice
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                  Delete
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {incomeEntries.length === 0 && (
+                          <tr>
+                            <td colSpan={8} className="p-6 text-center text-muted-foreground italic">
+                              No income entries for this date
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Expense Table */}
+              {/* Expense Section */}
               <Card>
                 <CardContent className="p-0">
-                  <div className="p-4 border-b border-border">
-                    <h3 className="font-semibold text-expense">Expense Table</h3>
+                  <div className="p-3 lg:p-4 border-b border-border">
+                    <h3 className="font-semibold text-expense text-sm lg:text-base">Expense ({expenseEntries.length})</h3>
                   </div>
-                  <div className="overflow-x-auto">
+                  
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden p-3">
+                    {expenseEntries.length === 0 ? (
+                      <p className="text-center text-muted-foreground italic py-4 text-sm">
+                        No expense entries for this date
+                      </p>
+                    ) : (
+                      expenseEntries.map(entry => (
+                        <MobileEntryCard
+                          key={entry.id}
+                          type="expense"
+                          entry={entry}
+                          onDelete={handleDeleteEntry}
+                          onViewBill={entry.billFile ? async (path, name) => {
+                            const signedUrl = await getSignedUrl(path);
+                            if (signedUrl) {
+                              setViewImageDialog({ open: true, url: signedUrl, name });
+                            }
+                          } : undefined}
+                        />
+                      ))
+                    )}
+                  </div>
+                  
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full">
-                       <thead>
-                         <tr className="border-b border-border">
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
-                           <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         {expenseEntries.map(entry => (
-                           <tr key={entry.id} className="border-b border-border">
-                             <td className="p-3 text-sm">
-                               <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                 entry.type === 'monthly-expense' 
-                                   ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200' 
-                                   : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200'
-                               }`}>
-                                 {entry.type === 'monthly-expense' ? 'Monthly' : 'Daily'}
-                               </span>
-                             </td>
-                             <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
-                             <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
-                             <td className="p-3">
-                               {entry.billFile ? (
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={async () => {
-                                     const signedUrl = await getSignedUrl(entry.billFile!.path);
-                                     if (signedUrl) {
-                                       setViewImageDialog({ 
-                                         open: true, 
-                                         url: signedUrl, 
-                                         name: entry.billFile!.name 
-                                       });
-                                     }
-                                   }}
-                                   className="flex items-center gap-1"
-                                 >
-                                   <Eye className="h-3 w-3" />
-                                   View
-                                 </Button>
-                               ) : (
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Type</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Title</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Charge</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Bill</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expenseEntries.map(entry => (
+                          <tr key={entry.id} className="border-b border-border">
+                            <td className="p-3 text-sm">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                entry.type === 'monthly-expense' 
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200' 
+                                  : 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200'
+                              }`}>
+                                {entry.type === 'monthly-expense' ? 'Monthly' : 'Daily'}
+                              </span>
+                            </td>
+                            <td className="p-3 text-sm">{entry.note || 'Expense'}</td>
+                            <td className="p-3 text-sm font-medium text-expense">Rs {entry.amount}</td>
+                            <td className="p-3">
+                              {entry.billFile ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={async () => {
+                                    const signedUrl = await getSignedUrl(entry.billFile!.path);
+                                    if (signedUrl) {
+                                      setViewImageDialog({ 
+                                        open: true, 
+                                        url: signedUrl, 
+                                        name: entry.billFile!.name 
+                                      });
+                                    }
+                                  }}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  View
+                                </Button>
+                              ) : (
                                 <span className="text-xs text-muted-foreground">No file</span>
                               )}
-                             </td>
-                             <td className="p-3">
-                               <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
-                                 Delete
-                               </Button>
-                             </td>
-                           </tr>
-                         ))}
-                         {expenseEntries.length === 0 && (
-                           <tr>
-                             <td colSpan={5} className="p-6 text-center text-muted-foreground italic">
-                               No expense entries for this date
-                             </td>
-                           </tr>
-                         )}
+                            </td>
+                            <td className="p-3">
+                              <Button size="sm" variant="destructive" onClick={() => handleDeleteEntry(entry.id)}>
+                                Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                        {expenseEntries.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-6 text-center text-muted-foreground italic">
+                              No expense entries for this date
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
