@@ -5,9 +5,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+
+// Public website pages
 import Home from "./pages/Home";
+import About from "./pages/About";
+import Services from "./pages/Services";
+import Contact from "./pages/Contact";
+
+// Tracker pages
 import TrackerLogin from "./pages/TrackerLogin";
 import TrackerDashboard from "./pages/TrackerDashboard";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,13 +28,16 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public route */}
+            {/* Public website routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/contact" element={<Contact />} />
             
-            {/* Auth route - Login page */}
+            {/* Tracker auth route */}
             <Route path="/tracker" element={<TrackerLogin />} />
             
-            {/* Protected routes */}
+            {/* Protected tracker routes */}
             <Route 
               path="/tracker/dashboard" 
               element={
