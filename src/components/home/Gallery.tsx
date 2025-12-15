@@ -1,38 +1,52 @@
+import gallery1 from '@/assets/gallery-1.png';
+import gallery2 from '@/assets/gallery-2.png';
+import gallery3 from '@/assets/gallery-3.png';
+import gallery4 from '@/assets/gallery-4.png';
+import gallery5 from '@/assets/gallery-5.png';
+import gallery6 from '@/assets/gallery-6.png';
+import gallery7 from '@/assets/gallery-7.png';
+import gallery8 from '@/assets/gallery-8.png';
+
 const galleryImages = [
   {
-    src: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&auto=format&fit=crop',
-    alt: 'Luxury car exterior',
+    src: gallery1,
+    alt: 'Classic convertible restoration',
     span: 'md:col-span-2 md:row-span-2',
   },
   {
-    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop',
-    alt: 'Classic car restoration',
+    src: gallery2,
+    alt: 'Land Cruiser restoration',
     span: '',
   },
   {
-    src: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop',
-    alt: 'Sports car detailing',
+    src: gallery3,
+    alt: 'Vehicle rear detail',
     span: '',
   },
   {
-    src: 'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?w=600&auto=format&fit=crop',
-    alt: 'Car paint booth',
+    src: gallery4,
+    alt: 'Engine bay work',
     span: '',
   },
   {
-    src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop',
-    alt: 'Engine bay detail',
+    src: gallery5,
+    alt: 'Custom Jeep build',
     span: '',
   },
   {
-    src: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop',
-    alt: 'Premium vehicle',
+    src: gallery6,
+    alt: 'BMW interior restoration',
     span: '',
   },
   {
-    src: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&auto=format&fit=crop',
-    alt: 'Showroom quality finish',
+    src: gallery7,
+    alt: 'BMW sunset shot',
     span: 'md:col-span-2 md:row-span-2',
+  },
+  {
+    src: gallery8,
+    alt: 'Toyota front detail',
+    span: '',
   },
 ];
 

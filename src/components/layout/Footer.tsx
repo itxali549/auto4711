@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
+import logo from '@/assets/auto711-logo.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -10,7 +11,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="inline-block">
+            <Link to="/" className="inline-flex items-center gap-3">
+              <img 
+                src={logo} 
+                alt="AUTO 711 Logo" 
+                className="h-16 md:h-20 w-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] brightness-150 contrast-125"
+              />
               <span className="text-2xl font-heading font-bold tracking-tight">
                 Auto<span className="text-primary">711</span>
               </span>
