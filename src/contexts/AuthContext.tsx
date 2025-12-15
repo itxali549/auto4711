@@ -31,25 +31,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show login immediately, no waiting
-    setLoading(false);
-    
-    // Listen for auth changes and handle session in background
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          // User authenticated, fetch role in background
-          fetchUserRole(session.user);
+          // Defer role fetching to avoid deadlock
+          setTimeout(() => {
+            fetchUserRole(session.user);
+          }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
       }
     );
 
-    // Check existing session in background without blocking UI
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         fetchUserRole(session.user);
+      } else {
+        setLoading(false);
       }
     });
 
