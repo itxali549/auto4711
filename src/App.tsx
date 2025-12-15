@@ -3,25 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Home from "./pages/Home";
+import TrackerLogin from "./pages/TrackerLogin";
+import TrackerDashboard from "./pages/TrackerDashboard";
 import NotFound from "./pages/NotFound";
-import Login from "@/components/Login";
 
 const queryClient = new QueryClient();
-
-const AppContent = () => {
-  // Authentication disabled - showing main app directly
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  );
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,7 +18,27 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <AppContent />
+        <BrowserRouter>
+          <Routes>
+            {/* Public route */}
+            <Route path="/" element={<Home />} />
+            
+            {/* Auth route - Login page */}
+            <Route path="/tracker" element={<TrackerLogin />} />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/tracker/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <TrackerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
