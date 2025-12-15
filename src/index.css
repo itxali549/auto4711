@@ -2,114 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* AUTO 711 Design System - Dark theme with red accents */
 
 @layer base {
   :root {
-    /* ZB AutoCare Logo Colors - Blue, Black, Gold theme */
-    --background: 220 30% 6%;
-    --foreground: 210 20% 98%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
 
-    --card: 220 28% 10%;
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 220 28% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary: Vibrant Blue from logo */
-    --primary: 214 100% 50%;
+    /* Primary: Red accent */
+    --primary: 0 85% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Gold/Yellow accent from logo */
-    --secondary: 48 100% 50%;
-    --secondary-foreground: 220 30% 6%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 214 100% 50%;
+    --accent: 0 85% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 214 100% 50%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 85% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Gold gradients for tracker - matching logo gold */
+    /* Custom tokens for AUTO 711 */
+    --red-glow: 0 0 40px hsla(0, 85%, 50%, 0.4);
+    --red-gradient: linear-gradient(135deg, hsl(0, 85%, 50%) 0%, hsl(0, 75%, 40%) 100%);
+    --dark-gradient: linear-gradient(180deg, hsl(0, 0%, 5%) 0%, hsl(0, 0%, 2%) 100%);
+    --card-gradient: linear-gradient(145deg, hsl(0, 0%, 10%) 0%, hsl(0, 0%, 6%) 100%);
+    --metallic-gradient: linear-gradient(135deg, hsl(0, 0%, 70%) 0%, hsl(0, 0%, 45%) 50%, hsl(0, 0%, 60%) 100%);
+
+    /* Tracker-specific tokens (preserved for /tracker routes) */
     --gold-start: 48 100% 60%;
     --gold-end: 45 100% 45%;
     --gold-gradient: linear-gradient(135deg, hsl(var(--gold-start)), hsl(var(--gold-end)));
-    
-    /* Income/expense colors - using logo palette */
     --income: 48 100% 50%;
     --expense: 0 72% 51%;
-    
-    /* Calendar colors */
     --calendar-today: var(--gold-gradient);
-    --calendar-hover: 220 20% 22%;
-    
-    /* Shadows - blue and gold glows */
+    --calendar-hover: 0 0% 22%;
     --shadow-blue: 0 10px 40px -10px hsl(214 100% 50% / 0.4);
     --shadow-gold: 0 10px 30px -10px hsl(48 100% 50% / 0.3);
     --shadow-card: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
-    
-    /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 220 30% 8%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 214 100% 50%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 85% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 214 100% 50%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 85% 50%;
   }
 
   .dark {
-    /* ZB AutoCare Dark Mode - matching logo theme */
-    --background: 220 30% 6%;
-    --foreground: 210 20% 98%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
 
-    --card: 220 28% 10%;
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 220 28% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 214 100% 50%;
+    --primary: 0 85% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 48 100% 50%;
-    --secondary-foreground: 220 30% 6%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 214 100% 50%;
+    --accent: 0 85% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 214 100% 50%;
-    
-    --sidebar-background: 220 30% 8%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 214 100% 50%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 85% 50%;
+
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 85% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 214 100% 50%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 85% 50%;
   }
 }
 
@@ -119,6 +113,116 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  /* Text gradients */
+  .text-gradient {
+    background-image: var(--red-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-metallic {
+    background-image: var(--metallic-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Background gradients */
+  .bg-gradient-red {
+    background-image: var(--red-gradient);
+  }
+
+  .bg-gradient-dark {
+    background-image: var(--dark-gradient);
+  }
+
+  .card-gradient {
+    background-image: var(--card-gradient);
+  }
+
+  /* Glow effects */
+  .glow-red {
+    box-shadow: var(--red-glow);
+  }
+}
+
+/* Custom animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsla(0, 85%, 50%, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsla(0, 85%, 50%, 0.5);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.6s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
   }
 }
