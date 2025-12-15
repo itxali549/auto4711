@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import logo from '@/assets/auto711-logo.png';
 
 const navLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Services', href: '/services' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'HOME', href: '/' },
+  { name: 'ABOUT', href: '/about' },
+  { name: 'SERVICES', href: '/services' },
+  { name: 'CONTACT', href: '/contact' },
 ];
 
 const Header = () => {
@@ -51,10 +52,15 @@ const Header = () => {
       }`}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-24 md:h-28">
+        <div className="flex items-center justify-between h-20 md:h-24">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl md:text-3xl font-heading font-bold tracking-tight">
+          <Link to="/" className="flex items-center gap-3">
+            <img 
+              src={logo} 
+              alt="AUTO 711 Logo" 
+              className="h-14 md:h-16 w-auto drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] brightness-125 contrast-110"
+            />
+            <span className="text-xl md:text-2xl font-heading font-bold tracking-tight">
               Auto<span className="text-primary">711</span>
             </span>
           </Link>
@@ -65,7 +71,7 @@ const Header = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                className={`relative text-sm font-medium transition-colors hover:text-primary ${
+                className={`relative text-sm font-medium tracking-wide transition-colors hover:text-primary ${
                   isActive(link.href) ? 'text-primary' : 'text-foreground'
                 }`}
               >
@@ -100,6 +106,18 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] bg-background border-border">
               <div className="flex flex-col gap-8 mt-8">
+                {/* Mobile Logo */}
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={logo} 
+                    alt="AUTO 711 Logo" 
+                    className="h-12 w-auto drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] brightness-125 contrast-110"
+                  />
+                  <span className="text-xl font-heading font-bold tracking-tight">
+                    Auto<span className="text-primary">711</span>
+                  </span>
+                </div>
+                
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
                     <Link
