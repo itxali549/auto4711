@@ -9,14 +9,11 @@ import { EmployeeCard } from './EmployeeCard';
 
 type Employee = {
   id: string;
-  employee_code: string;
   name: string;
   role: string;
-  reason_for_hiring: string | null;
-  salary_type: 'monthly' | 'daily' | 'mixed';
-  monthly_salary: number;
-  daily_wage: number | null;
-  weekly_off_day: string | null;
+  salary: number;
+  phone: string | null;
+  email: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -62,7 +59,7 @@ export const EmployeeManagement = () => {
     setIsAddDialogOpen(false);
   };
 
-  const handlePaySalary = async (employeeId: string, amount: number, paymentType: 'daily' | 'monthly') => {
+  const handlePaySalary = async (employeeId: string, amount: number) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -77,7 +74,6 @@ export const EmployeeManagement = () => {
           user_id: user.id,
           employee_id: employeeId,
           amount,
-          payment_type: paymentType,
           payment_date: new Date().toISOString().split('T')[0],
         });
 
@@ -85,7 +81,7 @@ export const EmployeeManagement = () => {
 
       toast({
         title: 'Success',
-        description: `${paymentType === 'daily' ? 'Daily' : 'Monthly'} salary of ₹${amount} paid to ${employee.name}`,
+        description: `Salary of ₹${amount} paid to ${employee.name}`,
       });
 
       fetchEmployees();

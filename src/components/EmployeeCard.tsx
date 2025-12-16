@@ -14,19 +14,16 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { User, Trash2, IndianRupee, Calendar, ChevronDown } from 'lucide-react';
+import { User, Trash2, IndianRupee, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 type Employee = {
   id: string;
-  employee_code: string;
   name: string;
   role: string;
-  reason_for_hiring: string | null;
-  salary_type: 'monthly' | 'daily' | 'mixed';
-  monthly_salary: number;
-  daily_wage: number | null;
-  weekly_off_day: string | null;
+  salary: number;
+  phone: string | null;
+  email: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -35,13 +32,12 @@ type SalaryPayment = {
   id: string;
   payment_date: string;
   amount: number;
-  payment_type: string;
   notes: string | null;
 };
 
 type EmployeeCardProps = {
   employee: Employee;
-  onPaySalary: (employeeId: string, amount: number, paymentType: 'daily' | 'monthly') => void;
+  onPaySalary: (employeeId: string, amount: number) => void;
   onDelete: (employeeId: string) => void;
 };
 
@@ -108,7 +104,7 @@ export const EmployeeCard = ({ employee, onPaySalary, onDelete }: EmployeeCardPr
             <div>
               <CardTitle className="text-base">{employee.name}</CardTitle>
               <Badge variant="outline" className="mt-1 text-xs">
-                {employee.employee_code}
+                {employee.role}
               </Badge>
             </div>
           </div>
@@ -143,89 +139,34 @@ export const EmployeeCard = ({ employee, onPaySalary, onDelete }: EmployeeCardPr
           </div>
           
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Salary Type:</span>
-            <Badge variant="secondary" className="text-xs">
-              {employee.salary_type === 'mixed' ? 'Monthly + Daily' : 
-               employee.salary_type === 'monthly' ? 'Monthly' : 'Daily Wage'}
-            </Badge>
+            <span className="text-muted-foreground">Salary:</span>
+            <span className="font-medium">PKR {Number(employee.salary).toLocaleString('en-PK')}</span>
           </div>
 
-          {(employee.salary_type === 'monthly' || employee.salary_type === 'mixed') && (
+          {employee.phone && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Monthly Salary:</span>
-              <span className="font-medium">PKR {employee.monthly_salary.toLocaleString('en-PK')}</span>
-            </div>
-          )}
-          
-          {(employee.salary_type === 'daily' || employee.salary_type === 'mixed') && employee.daily_wage && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {employee.salary_type === 'mixed' ? 'Daily Bonus:' : 'Daily Wage:'}
-              </span>
-              <span className="font-medium">PKR {employee.daily_wage.toLocaleString('en-PK')}</span>
+              <span className="text-muted-foreground">Phone:</span>
+              <span className="font-medium">{employee.phone}</span>
             </div>
           )}
 
-          {employee.weekly_off_day && employee.weekly_off_day !== 'none' && (
+          {employee.email && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Weekly Off:</span>
-              <span className="font-medium capitalize">{employee.weekly_off_day}</span>
-            </div>
-          )}
-
-          {employee.reason_for_hiring && (
-            <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground">
-                {employee.reason_for_hiring}
-              </p>
+              <span className="text-muted-foreground">Email:</span>
+              <span className="font-medium">{employee.email}</span>
             </div>
           )}
         </div>
 
         <div className="flex gap-2 pt-2">
-          {employee.salary_type === 'monthly' && (
-            <Button
-              size="sm"
-              className="flex-1"
-              onClick={() => onPaySalary(employee.id, employee.monthly_salary, 'monthly')}
-            >
-              <Calendar className="h-3 w-3 mr-1" />
-              Pay Monthly
-            </Button>
-          )}
-          
-          {employee.salary_type === 'daily' && employee.daily_wage && (
-            <Button
-              size="sm"
-              className="flex-1"
-              onClick={() => onPaySalary(employee.id, employee.daily_wage!, 'daily')}
-            >
-              <IndianRupee className="h-3 w-3 mr-1" />
-              Pay Daily
-            </Button>
-          )}
-
-          {employee.salary_type === 'mixed' && (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1"
-                onClick={() => onPaySalary(employee.id, employee.daily_wage!, 'daily')}
-              >
-                <IndianRupee className="h-3 w-3 mr-1" />
-                Daily
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={() => onPaySalary(employee.id, employee.monthly_salary, 'monthly')}
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                Monthly
-              </Button>
-            </>
-          )}
+          <Button
+            size="sm"
+            className="flex-1"
+            onClick={() => onPaySalary(employee.id, Number(employee.salary))}
+          >
+            <IndianRupee className="h-3 w-3 mr-1" />
+            Pay Salary
+          </Button>
         </div>
 
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -261,9 +202,6 @@ export const EmployeeCard = ({ employee, onPaySalary, onDelete }: EmployeeCardPr
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">PKR {Number(payment.amount).toLocaleString('en-PK')}</p>
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {payment.payment_type}
-                          </Badge>
                         </div>
                       </div>
                     ))}
