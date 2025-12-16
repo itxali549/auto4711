@@ -291,7 +291,7 @@ Thank you for choosing ZB Autocare! 🚘`;
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 tracker-theme">
       <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

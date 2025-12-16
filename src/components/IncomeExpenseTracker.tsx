@@ -967,7 +967,7 @@ const IncomeExpenseTracker: React.FC = () => {
     const EmployeeManagement = React.lazy(() => import('./EmployeeManagement').then(module => ({ default: module.EmployeeManagement })));
     return (
       <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-        <div className="min-h-screen bg-background p-4">
+        <div className="min-h-screen bg-background p-4 tracker-theme">
           <div className="max-w-7xl mx-auto">
             <Button onClick={() => setShowEmployees(false)} variant="outline" size="sm" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -983,7 +983,7 @@ const IncomeExpenseTracker: React.FC = () => {
   // Show Marketing if selected
   if (showMarketing) {
     return (
-      <div className="min-h-screen bg-background p-4">
+      <div className="min-h-screen bg-background p-4 tracker-theme">
         <div className="max-w-7xl mx-auto">
           <Button onClick={() => setShowMarketing(false)} variant="outline" size="sm" className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -1013,7 +1013,7 @@ const IncomeExpenseTracker: React.FC = () => {
   const pendingFollowUpsCount = getPendingFollowUpsCount();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background tracker-theme">
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-screen">
         {/* Left Panel */}
         <div className="bg-card border-r border-border p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
