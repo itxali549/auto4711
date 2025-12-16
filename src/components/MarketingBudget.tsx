@@ -13,9 +13,10 @@ import { toast } from '@/hooks/use-toast';
 interface MarketingExpense {
   id: string;
   expense_date: string;
-  purpose: string;
+  title: string;
   amount: number;
   notes: string | null;
+  category: string | null;
 }
 
 interface MarketingBudgetProps {
@@ -29,7 +30,7 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
-    purpose: '',
+    title: '',
     amount: '',
     notes: ''
   });
@@ -70,7 +71,7 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
   };
 
   const handleAddExpense = async () => {
-    if (!user || !formData.purpose || !formData.amount || parseFloat(formData.amount) <= 0) {
+    if (!user || !formData.title || !formData.amount || parseFloat(formData.amount) <= 0) {
       toast({
         title: 'Validation Error',
         description: 'Please fill all required fields with valid values',
@@ -81,13 +82,13 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
 
     const { error } = await supabase
       .from('marketing_expenses')
-      .insert({
+      .insert([{
         user_id: user.id,
         expense_date: formData.date,
-        purpose: formData.purpose,
+        title: formData.title,
         amount: parseFloat(formData.amount),
         notes: formData.notes || null
-      });
+      }]);
 
     if (error) {
       console.error('Error adding marketing expense:', error);
@@ -106,7 +107,7 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
 
     setFormData({
       date: new Date().toISOString().split('T')[0],
-      purpose: '',
+      title: '',
       amount: '',
       notes: ''
     });
@@ -138,7 +139,7 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
     loadExpenses();
   };
 
-  const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalSpent = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
   const remainingBudget = monthlyMarketingBudget - totalSpent;
 
   return (
@@ -198,7 +199,7 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Purpose</TableHead>
+                  <TableHead>Title</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
@@ -208,8 +209,8 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
                 {expenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell>{new Date(expense.expense_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{expense.purpose}</TableCell>
-                    <TableCell className="font-semibold">₹{expense.amount.toFixed(2)}</TableCell>
+                    <TableCell>{expense.title}</TableCell>
+                    <TableCell className="font-semibold">₹{Number(expense.amount).toFixed(2)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {expense.notes || '-'}
                     </TableCell>
@@ -245,11 +246,11 @@ const MarketingBudget: React.FC<MarketingBudgetProps> = ({ monthlyMarketingBudge
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Purpose *</label>
+              <label className="text-sm font-medium">Title *</label>
               <Input
                 placeholder="e.g., Facebook Ads, Google Ads"
-                value={formData.purpose}
-                onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
             <div>

@@ -70,9 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching user role:', error);
       }
 
-      const userWithRole = {
+      const userWithRole: AuthUser = {
         ...authUser,
-        role: data?.role || 'staff' // Default to staff if no role found
+        role: (data?.role as UserRole) || 'staff' // Default to staff if no role found
       };
 
       setUser(userWithRole);
