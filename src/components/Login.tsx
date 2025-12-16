@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import logo from '@/assets/zb-autocare-logo.jpg';
+import logo from '@/assets/auto711-logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -38,8 +38,8 @@ const Login = () => {
           <div className="flex justify-center mb-4">
             <img 
               src={logo} 
-              alt="ZB Autocare Logo" 
-              className="h-16 w-auto object-contain"
+              alt="Auto711 Logo" 
+              className="h-20 w-auto object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>

@@ -7,7 +7,7 @@ import { Card, CardContent } from './ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Upload, Eye, FileImage, Users, UserCog, ArrowLeft, TrendingUp, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import logoImage from '../assets/zb-autocare-logo.jpg';
+import logoImage from '../assets/auto711-logo.png';
 import LeadSheet from './LeadSheet';
 import MarketingBudget from './MarketingBudget';
 import { EmployeeManagement } from './EmployeeManagement';
@@ -1021,7 +1021,7 @@ const IncomeExpenseTracker: React.FC = () => {
           <div className="flex items-center justify-center">
             <img 
               src={logoImage} 
-              alt="ZB Autocare Logo" 
+              alt="Auto711 Logo" 
               className="w-24 h-24 object-contain rounded-xl shadow-lg"
             />
           </div>
@@ -1029,7 +1029,7 @@ const IncomeExpenseTracker: React.FC = () => {
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              ZB Tracker
+              Auto711
             </h1>
             <p className="text-sm text-muted-foreground">Income & Expense • Single file</p>
           </div>
