@@ -72,8 +72,8 @@ const ServicesPreview = () => {
         {/* CTA */}
         <div className="text-center">
           <Button asChild variant="outline" size="lg">
-            <Link to="/contact">
-              Get in Touch
+            <Link to="/services">
+              More Services
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
