@@ -6,16 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-// Public website pages
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import Contact from "./pages/Contact";
-
-// Tracker pages
-import TrackerLogin from "./pages/TrackerLogin";
-import TrackerDashboard from "./pages/TrackerDashboard";
-
+// Admin pages
+import AdminLogin from "./pages/AdminLogin";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,21 +21,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public website routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} />
+            {/* Admin login route */}
+            <Route path="/login" element={<AdminLogin />} />
             
-            {/* Tracker auth route */}
-            <Route path="/tracker" element={<TrackerLogin />} />
-            
-            {/* Protected tracker routes */}
+            {/* Protected dashboard - now the root */}
             <Route 
-              path="/tracker/dashboard" 
+              path="/" 
               element={
                 <ProtectedRoute>
-                  <TrackerDashboard />
+                  <Dashboard />
                 </ProtectedRoute>
               } 
             />
