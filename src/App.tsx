@@ -6,6 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+// Website pages
+import Home from "./pages/website/Home";
+import About from "./pages/website/About";
+import Services from "./pages/website/Services";
+import Gallery from "./pages/website/Gallery";
+import Testimonials from "./pages/website/Testimonials";
+import Contact from "./pages/website/Contact";
+
 // Admin pages
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
@@ -21,12 +29,18 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Admin login route */}
-            <Route path="/login" element={<AdminLogin />} />
+            {/* Public website routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/contact" element={<Contact />} />
             
-            {/* Protected dashboard - now the root */}
+            {/* Admin routes */}
+            <Route path="/login" element={<AdminLogin />} />
             <Route 
-              path="/" 
+              path="/tracker" 
               element={
                 <ProtectedRoute>
                   <Dashboard />
