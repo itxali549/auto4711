@@ -21,12 +21,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Empty root for future landing pages */}
+            <Route path="/" element={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Landing page coming soon...</p></div>} />
+            
             {/* Admin login route */}
             <Route path="/login" element={<AdminLogin />} />
             
-            {/* Protected dashboard - now the root */}
+            {/* Protected dashboard at /tracker */}
             <Route 
-              path="/" 
+              path="/tracker" 
               element={
                 <ProtectedRoute>
                   <Dashboard />
