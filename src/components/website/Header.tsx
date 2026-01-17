@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone } from 'lucide-react';
-import logo from '@/assets/zb-autocare-logo.jpg';
+import logo from '@/assets/zb-logo.png';
 
 const navLinks = [
   { path: '/', label: 'Home' },
@@ -21,9 +21,8 @@ const Header = () => {
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img src={logo} alt="ZB AutoCare" className="h-10 md:h-12 rounded-full" />
-            <span className="font-bold text-lg md:text-xl">ZB AutoCare</span>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="ZB AutoCare" className="h-12 md:h-14" />
           </Link>
 
           {/* Desktop Navigation */}
