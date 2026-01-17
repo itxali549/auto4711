@@ -6,10 +6,19 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+// Website pages
+import WebsiteLayout from "@/components/website/WebsiteLayout";
+import Index from "@/pages/website/Index";
+import About from "@/pages/website/About";
+import Services from "@/pages/website/Services";
+import Gallery from "@/pages/website/Gallery";
+import Testimonials from "@/pages/website/Testimonials";
+import Contact from "@/pages/website/Contact";
+import WebsiteNotFound from "@/pages/website/NotFound";
+
 // Admin pages
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -21,10 +30,18 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Empty root for future landing pages */}
-            <Route path="/" element={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Landing page coming soon...</p></div>} />
+            {/* Public website routes with layout */}
+            <Route element={<WebsiteLayout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="*" element={<WebsiteNotFound />} />
+            </Route>
             
-            {/* Admin login route */}
+            {/* Admin login route (hidden from public nav) */}
             <Route path="/login" element={<AdminLogin />} />
             
             {/* Protected dashboard at /tracker */}
@@ -36,8 +53,6 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
