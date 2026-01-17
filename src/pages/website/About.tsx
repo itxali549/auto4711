@@ -1,5 +1,5 @@
 import { Shield, Award, Users, Clock, CheckCircle } from 'lucide-react';
-import logo from '@/assets/zb-autocare-logo.jpg';
+import logo from '@/assets/zb-logo.png';
 
 const stats = [
   { value: '35+', label: 'Years Experience' },

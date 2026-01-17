@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Phone, MapPin, Clock, Instagram, Mail } from 'lucide-react';
-import logo from '@/assets/zb-autocare-logo.jpg';
+import logo from '@/assets/zb-logo.png';
 
 const Footer = () => {
   return (
@@ -9,9 +9,8 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="ZB AutoCare" className="h-10 rounded-full" />
-              <span className="font-bold text-lg">ZB AutoCare</span>
+            <div className="mb-4">
+              <img src={logo} alt="ZB AutoCare" className="h-14" />
             </div>
             <p className="text-muted-foreground text-sm mb-4">
               Trusted car mechanic shop in Gulistan-e-Johar Karachi with 35+ years of experience 

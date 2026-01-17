@@ -3,7 +3,7 @@ import {
   Wrench, Settings, Car, Gauge, Shield, Users, 
   ThumbsUp, DollarSign, Star, Phone, CheckCircle 
 } from 'lucide-react';
-import logo from '@/assets/zb-autocare-logo.jpg';
+import logo from '@/assets/zb-logo.png';
 
 const services = [
   { icon: Wrench, title: 'Engine Work', desc: 'Complete engine repair & overhaul' },
@@ -36,7 +36,7 @@ const Index = () => {
           <div className="max-w-2xl">
             {/* Content */}
             <div className="text-left animate-slide-up">
-              <img src={logo} alt="ZB AutoCare" className="h-24 md:h-32 mb-6 rounded-2xl" />
+              <img src={logo} alt="ZB AutoCare" className="h-20 md:h-28 mb-6" />
               
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
                 35+ Years of Experience in{' '}
