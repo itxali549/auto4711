@@ -4,6 +4,7 @@ import {
   ThumbsUp, DollarSign, Star, Phone, CheckCircle 
 } from 'lucide-react';
 import logo from '@/assets/zb-logo.png';
+import heroBackground from '@/assets/hero-workshop.jpg';
 
 const services = [
   { icon: Wrench, title: 'Engine Work', desc: 'Complete engine repair & overhaul' },
@@ -31,43 +32,58 @@ const Index = () => {
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-secondary to-background">
-        <div className="container-custom">
-          <div className="max-w-2xl">
-            {/* Content */}
-            <div className="text-left animate-slide-up">
-              <img src={logo} alt="ZB AutoCare" className="h-20 md:h-28 mb-6" />
-              
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
-                35+ Years of Experience in{' '}
-                <span className="text-gradient">Mechanical Work</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-xl">
-                Trusted Car Mechanic in Karachi — Experts in Engine, Transmission & Complete Car Maintenance
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-start">
-                <a href="tel:+923032931424" className="btn-primary inline-flex items-center justify-center gap-2">
-                  <Phone className="w-5 h-5" />
-                  Call Now
-                </a>
-                <Link to="/services" className="btn-outline inline-flex items-center justify-center">
-                  View Services
-                </Link>
-              </div>
-              
-              {/* Floating badge */}
-              <div className="inline-flex mt-8 bg-card/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-border">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <span className="font-bold">5.0</span>
-                  <span className="text-muted-foreground text-sm">(34+ reviews)</span>
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroBackground})` }}
+        />
+        {/* Gradient Overlay - stronger on left for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+        
+        <div className="container-custom relative z-10">
+          <div className="max-w-xl">
+            {/* Logo */}
+            <img src={logo} alt="ZB AutoCare" className="h-24 md:h-32 mb-6" />
+            
+            {/* Main Heading */}
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
+              35+ Years of Experience in{' '}
+              <span className="text-primary">Mechanical Work</span>
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg">
+              Trusted Car Mechanic in Karachi — Experts in Engine, Transmission & Complete Car Maintenance
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-4">
+              <a 
+                href="tel:+923032931424" 
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-lg"
+              >
+                <Phone className="w-5 h-5" />
+                Call Now
+              </a>
+              <Link 
+                to="/services" 
+                className="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                View Services
+              </Link>
+            </div>
+            
+            {/* Rating Badge */}
+            <div className="inline-flex mt-8 bg-card/95 backdrop-blur-sm px-5 py-3 rounded-xl shadow-lg border border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                  ))}
                 </div>
+                <span className="font-bold text-foreground">5.0</span>
+                <span className="text-muted-foreground text-sm">(34+ reviews)</span>
               </div>
             </div>
           </div>
