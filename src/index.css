@@ -1,123 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* AUTO 711 Design System - Dark theme with red accents */
-
 @layer base {
   :root {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
+    /* ZB AutoCare Brand Colors */
+    --background: 38 50% 94%; /* Light beige */
+    --foreground: 0 0% 10%; /* Near black */
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 38 45% 96%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 38 45% 96%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Primary: Red accent */
-    --primary: 0 85% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 36 95% 50%; /* Orange/Yellow */
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 38 30% 88%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 38 25% 90%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 0 85% 50%;
+    --accent: 0 75% 45%; /* Red for Urdu tagline */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 85% 50%;
+    --border: 38 30% 82%;
+    --input: 38 30% 85%;
+    --ring: 36 95% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom tokens for AUTO 711 */
-    --red-glow: 0 0 40px hsla(0, 85%, 50%, 0.4);
-    --red-gradient: linear-gradient(135deg, hsl(0, 85%, 50%) 0%, hsl(0, 75%, 40%) 100%);
-    --dark-gradient: linear-gradient(180deg, hsl(0, 0%, 5%) 0%, hsl(0, 0%, 2%) 100%);
-    --card-gradient: linear-gradient(145deg, hsl(0, 0%, 10%) 0%, hsl(0, 0%, 6%) 100%);
-    --metallic-gradient: linear-gradient(135deg, hsl(0, 0%, 70%) 0%, hsl(0, 0%, 45%) 50%, hsl(0, 0%, 60%) 100%);
+    /* Custom brand tokens */
+    --brand-beige: 38 50% 94%;
+    --brand-orange: 36 95% 50%;
+    --brand-red: 0 75% 45%;
+    --brand-dark: 0 0% 15%;
+    --brand-gold: 45 90% 55%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(38 50% 90%) 0%, hsl(38 45% 85%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(38 45% 98%) 0%, hsl(38 40% 94%) 100%);
+    --gradient-cta: linear-gradient(135deg, hsl(36 95% 50%) 0%, hsl(36 90% 45%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.08);
+    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 8px 32px hsl(0 0% 0% / 0.12);
+    --shadow-glow: 0 0 30px hsl(36 95% 50% / 0.3);
 
-    /* Tracker-specific tokens (preserved for /tracker routes) */
-    --gold-start: 48 100% 60%;
-    --gold-end: 45 100% 45%;
-    --gold-gradient: linear-gradient(135deg, hsl(var(--gold-start)), hsl(var(--gold-end)));
-    --income: 48 100% 50%;
-    --expense: 0 72% 51%;
-    --calendar-today: var(--gold-gradient);
-    --calendar-hover: 0 0% 22%;
-    --shadow-blue: 0 10px 40px -10px hsl(214 100% 50% / 0.4);
-    --shadow-gold: 0 10px 30px -10px hsl(48 100% 50% / 0.3);
-    --shadow-card: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Tracker tokens (for dashboard) */
+    --gold-start: 45 93% 47%;
+    --gold-end: 36 100% 50%;
+    --income: 142 71% 45%;
+    --expense: 0 84% 60%;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 85% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 0 85% 50%;
-  }
-
-  /* Tracker app blue theme override */
-  .tracker-theme {
-    --primary: 214 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 214 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --ring: 214 100% 50%;
-    --blue-glow: 0 0 40px hsla(214, 100%, 50%, 0.4);
-  }
-
-  .tracker-theme .glow-red {
-    box-shadow: 0 0 40px hsla(214, 100%, 50%, 0.4);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 0 85% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 65%;
-
-    --accent: 0 85% 50%;
+    --background: 0 0% 10%;
+    --foreground: 38 50% 94%;
+    --card: 0 0% 15%;
+    --card-foreground: 38 50% 94%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 38 50% 94%;
+    --primary: 36 95% 50%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 38 50% 94%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 38 30% 70%;
+    --accent: 0 75% 50%;
     --accent-foreground: 0 0% 100%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 38 50% 94%;
+    --sidebar-primary: 36 95% 50%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 38 50% 94%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 36 95% 50%;
+  }
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 85% 50%;
-
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 85% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 0 85% 50%;
+  /* Tracker theme override for dashboard */
+  .tracker-theme {
+    --primary: 217 91% 60%;
+    --accent: 217 91% 60%;
+  }
+  
+  .tracker-theme .glow-red {
+    box-shadow: 0 0 30px hsl(217 91% 60% / 0.5);
   }
 }
 
@@ -127,149 +116,82 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold tracking-tight;
   }
 }
 
-@layer utilities {
-  /* Text gradients */
+@layer components {
+  .section-padding {
+    @apply py-16 md:py-24 px-4;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
   .text-gradient {
-    background-image: var(--red-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-gradient-to-r from-primary to-[hsl(var(--brand-gold))] bg-clip-text text-transparent;
   }
 
-  .text-metallic {
-    background-image: var(--metallic-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .urdu-text {
+    font-family: 'Noto Nastaliq Urdu', serif;
+    direction: rtl;
   }
 
-  /* Background gradients */
-  .bg-gradient-red {
-    background-image: var(--red-gradient);
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-lg 
+           transition-all duration-300 hover:shadow-glow hover:scale-105 
+           active:scale-95;
   }
 
-  .bg-gradient-dark {
-    background-image: var(--dark-gradient);
+  .btn-outline {
+    @apply border-2 border-primary text-primary font-semibold px-6 py-3 rounded-lg 
+           transition-all duration-300 hover:bg-primary hover:text-primary-foreground;
   }
 
-  .card-gradient {
-    background-image: var(--card-gradient);
+  .service-icon {
+    @apply w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center
+           text-primary transition-all duration-300 group-hover:bg-primary 
+           group-hover:text-primary-foreground;
   }
 
-  /* Glow effects */
-  .glow-red {
-    box-shadow: var(--red-glow);
-  }
-
-  .shadow-glow {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
-  }
-}
-
-/* Website utility classes */
-.container-custom {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-}
-
-.section-padding {
-  @apply py-16 md:py-24;
-}
-
-.btn-primary {
-  @apply inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all duration-300;
-}
-
-.btn-outline {
-  @apply inline-flex items-center justify-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-primary-foreground transition-all duration-300;
-}
-
-.card-hover {
-  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
-}
-
-.service-icon {
-  @apply w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center text-primary;
-}
-
-.review-card {
-  @apply bg-card rounded-xl p-6 border border-border shadow-sm;
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.6s ease-out forwards;
-}
-
-/* Custom animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px hsla(0, 85%, 50%, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px hsla(0, 85%, 50%, 0.5);
+  .review-card {
+    @apply bg-card rounded-xl p-6 shadow-md border border-border/50
+           transition-all duration-300 hover:shadow-lg;
   }
 }
 
 @layer utilities {
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out forwards;
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
   }
 
   .animate-fade-in {
-    animation: fade-in 0.5s ease-out forwards;
+    animation: fadeIn 0.5s ease-out;
   }
 
-  .animate-slide-in-left {
-    animation: slide-in-left 0.6s ease-out forwards;
+  .animate-fade-in-up {
+    animation: slideUp 0.6s ease-out forwards;
   }
 
-  .animate-pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
+  .glow-red {
+    box-shadow: 0 0 30px hsl(0 75% 45% / 0.5);
   }
 
   .delay-100 {
@@ -287,4 +209,54 @@
   .delay-400 {
     animation-delay: 400ms;
   }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Sticky Call Button Animation */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+.pulse-ring::before {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-primary;
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gallery Modal */
+.gallery-modal-backdrop {
+  @apply fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.8);
 }
