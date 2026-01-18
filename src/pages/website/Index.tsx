@@ -32,58 +32,66 @@ const Index = () => {
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBackground})` }}
-        />
-        {/* Gradient Overlay - stronger on left for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-        
-        <div className="container-custom relative z-10">
-          <div className="max-w-xl">
-            {/* Logo */}
-            <img src={logo} alt="ZB AutoCare" className="h-24 md:h-32 mb-6" />
-            
-            {/* Main Heading */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
-              35+ Years of Experience in{' '}
-              <span className="text-primary">Mechanical Work</span>
-            </h1>
-            
-            {/* Subtitle */}
-            <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg">
-              Trusted Car Mechanic in Karachi — Experts in Engine, Transmission & Complete Car Maintenance
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <a 
-                href="tel:+923032931424" 
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-lg"
-              >
-                <Phone className="w-5 h-5" />
-                Call Now
-              </a>
-              <Link 
-                to="/services" 
-                className="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary/10 transition-colors"
-              >
-                View Services
-              </Link>
-            </div>
-            
-            {/* Rating Badge */}
-            <div className="inline-flex mt-8 bg-card/95 backdrop-blur-sm px-5 py-3 rounded-xl shadow-lg border border-border">
-              <div className="flex items-center gap-3">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-                  ))}
+      <section className="min-h-[90vh] bg-background">
+        <div className="container-custom h-full">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[90vh] py-12 lg:py-0">
+            {/* Left Side - Text Content */}
+            <div className="order-1 lg:order-1 flex flex-col justify-center lg:pr-8 xl:pr-16">
+              {/* Logo */}
+              <img src={logo} alt="ZB AutoCare" className="h-20 md:h-28 lg:h-32 mb-6 w-fit" />
+              
+              {/* Main Heading */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-4 leading-tight">
+                35+ Years of Experience in{' '}
+                <span className="text-primary">Mechanical Work</span>
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-lg">
+                Trusted Car Mechanic in Karachi — Experts in Engine, Transmission & Complete Car Maintenance
+              </p>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <a 
+                  href="tel:+923032931424" 
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-lg"
+                >
+                  <Phone className="w-5 h-5" />
+                  Call Now
+                </a>
+                <Link 
+                  to="/services" 
+                  className="inline-flex items-center px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary/10 transition-colors"
+                >
+                  View Services
+                </Link>
+              </div>
+              
+              {/* Rating Badge */}
+              <div className="inline-flex mt-8 bg-card px-5 py-3 rounded-xl shadow-lg border border-border w-fit">
+                <div className="flex items-center gap-3">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <span className="font-bold text-foreground">5.0</span>
+                  <span className="text-muted-foreground text-sm">(34+ reviews)</span>
                 </div>
-                <span className="font-bold text-foreground">5.0</span>
-                <span className="text-muted-foreground text-sm">(34+ reviews)</span>
+              </div>
+            </div>
+
+            {/* Right Side - Image */}
+            <div className="order-2 lg:order-2 flex items-center justify-center lg:justify-end">
+              <div className="relative w-full max-w-lg lg:max-w-none">
+                <img 
+                  src={heroBackground} 
+                  alt="ZB AutoCare Workshop" 
+                  className="w-full h-auto rounded-2xl shadow-2xl object-cover aspect-[4/3] lg:aspect-auto lg:h-[70vh] lg:max-h-[600px]"
+                />
+                {/* Subtle overlay for premium look */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
               </div>
             </div>
           </div>
