@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        heading: ["Montserrat", "sans-serif"],
+        sans: ['Poppins', 'sans-serif'],
+        heading: ['Poppins', 'sans-serif'],
+        urdu: ['Noto Nastaliq Urdu', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -50,6 +51,13 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        brand: {
+          beige: "hsl(var(--brand-beige))",
+          orange: "hsl(var(--brand-orange))",
+          red: "hsl(var(--brand-red))",
+          dark: "hsl(var(--brand-dark))",
+          gold: "hsl(var(--brand-gold))",
         },
         gold: {
           start: "hsl(var(--gold-start))",
@@ -90,12 +98,31 @@ export default {
           "0%, 100%": { filter: "drop-shadow(0 0 30px rgba(220,38,38,0.5))" },
           "50%": { filter: "drop-shadow(0 0 50px rgba(220,38,38,0.8))" },
         },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)", opacity: "0" },
+          to: { transform: "translateX(0)", opacity: "1" },
+        },
+        "slide-in-left": {
+          from: { transform: "translateX(-100%)", opacity: "0" },
+          to: { transform: "translateX(0)", opacity: "1" },
+        },
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 6s ease-in-out infinite",
         logoGlow: "logoGlow 3s ease-in-out infinite",
+        "slide-in-right": "slide-in-right 0.5s ease-out",
+        "slide-in-left": "slide-in-left 0.5s ease-out",
+        "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+      },
+      boxShadow: {
+        'glow': '0 0 30px hsl(36 95% 50% / 0.3)',
+        'glow-lg': '0 0 50px hsl(36 95% 50% / 0.4)',
       },
     },
   },
